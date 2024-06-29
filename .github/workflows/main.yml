@@ -1,0 +1,110 @@
+name: auditor-bundle 6.x CI
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+
+  code_style_composer_checks:
+    name: Runs PHP-CS-Fixer to check for CS issues, and validates composer.json
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: composer:v2
+      - name: Validate composer
+        run: composer validate --strict --no-check-lock
+
+  tests_sf:
+    name: Tests PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
+    runs-on: ubuntu-latest
+    needs: [ code_style_composer_checks ]
+
+    strategy:
+      matrix:
+        php:
+          - '8.2'
+          - '8.3'
+        symfony:
+          - '7.*'
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: composer:v2, flex, pcov
+          coverage: pcov
+
+      - name: Configure Symfony
+        run: |
+          composer global config --no-plugins allow-plugins.symfony/flex true
+          composer global require --no-progress --no-scripts --no-plugins symfony/flex
+          composer config extra.symfony.require "${{ matrix.symfony }}"
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ matrix.php }}-composer-
+
+      - name: Update project dependencies (7.*)
+        if: matrix.symfony == '7.*'
+        run: SYMFONY_REQUIRE="^7.0" composer update --no-progress --ansi --prefer-stable
+
+      - name: Run tests
+        run: |
+          RAW_CODECOV_REPORT="php-${{ matrix.php }}-sf-${{ matrix.symfony }}-coverage"
+          echo "CODECOV_REPORT=$(echo $RAW_CODECOV_REPORT | sed 's/\.\*//')" >> $GITHUB_ENV
+          vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage file
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.CODECOV_REPORT }}
+          path: coverage.xml
+
+  upload_coverage:
+    name: "Upload coverage to Codecov"
+    runs-on: "ubuntu-latest"
+    needs:
+      - tests_sf
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+          fetch-depth: 2
+
+      - name: "Download coverage files"
+        uses: "actions/download-artifact@v3"
+        with:
+          path: "reports"
+
+      - name: "Upload to Codecov"
+        uses: "codecov/codecov-action@v3"
+        with:
+          directory: reports
+          token: ${{ env.CODECOV_TOKEN }}
