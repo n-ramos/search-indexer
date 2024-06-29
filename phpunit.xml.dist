@@ -12,6 +12,9 @@
     <env name="SHELL_VERBOSITY" value="-1"/>
     <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
   </php>
+  <php>
+    <env name="DATABASE_URL" value="sqlite:///:memory:" />
+  </php>
   <source>
     <include>
       <directory>./src</directory>
