@@ -1,0 +1,32 @@
+{
+  "name": "nramos/search-indexer",
+  "version": "1.0.0",
+  "type": "symfony-bundle",
+  "description": "This bundle ",
+  "license": "MIT",
+  "require": {
+    "php" : ">=8.2",
+    "symfony/dependency-injection": "*",
+    "symfony/config": "*",
+    "doctrine/orm": "*"
+  },
+  "require-dev": {
+    "symfony/var-dumper": "^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Nramos\\SearchIndexer\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Nramos\\SearchIndexer\\Tests\\": "tests/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Nicolas Ramos",
+      "email": "searchindexer@nicolas-r.fr"
+    }
+  ]
+}

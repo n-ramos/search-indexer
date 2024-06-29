@@ -1,0 +1,11 @@
+parameters:
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Nramos\SearchIndexer\:
+    resource: '../src/**/*'
+    exclude: '../src/{Entity,Migrations,Tests,Kernel.php,*.yaml}'
