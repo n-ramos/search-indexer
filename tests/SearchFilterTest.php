@@ -23,7 +23,7 @@ class SearchFilterTest extends TestCase
 
     public function testLocationFilter()
     {
-        $filter = (new MeiliSearchFilter())->addLocationFilter('_geoRadius', 48.8566,2.3522, 5, 'km');
+        $filter = (new MeiliSearchFilter())->addLocationFilter('radius', 48.8566,2.3522, 5, 'km');
         $this->assertEquals('_geoRadius(48.856600, 2.352200, 5km)', $filter->toString());
     }
 
