@@ -83,10 +83,10 @@ class GenericIndexerTest extends TestCase
         // Configuration du client de recherche pour vérifier les appels
         $this->searchClient->expects($this->once())
             ->method('delete')
-            ->with($this->equalTo('houses'), $this->equalTo($houseId));
+            ->with($this->equalTo('houses'), $this->equalTo(1));
 
         // Appel de la méthode à tester
-        $this->indexer->remove($houseId, House::class);
+        $this->indexer->remove(1, House::class);
 
         // Assertions supplémentaires si nécessaire
         // Ex: Vérification que la suppression a été effectuée correctement
