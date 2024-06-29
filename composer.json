@@ -1,14 +1,13 @@
 {
   "name": "nramos/search-indexer",
-  "version": "1.0.0",
   "type": "symfony-bundle",
   "description": "This bundle ",
   "license": "MIT",
   "require": {
     "php" : ">=8.2",
     "symfony/dependency-injection": "*",
-    "symfony/config": "*",
-    "doctrine/orm": "*",
+    "symfony/config": "^7.1",
+    "doctrine/orm": "^3.2",
     "symfony/http-client": "^7.1",
     "symfony/http-kernel": "^7.1",
     "symfony/framework-bundle": "^7.1",
