@@ -30,9 +30,15 @@ class GenericIndexerTest extends TestCase
 
     public function testIndexHouse()
     {
+
         // Préparation des données de test
+        $houseType = new HouseType();
+        $houseType->setTypeName('Example Type');
+
         $house = new House();
-        $house->setName("House of test");
+        $house->setName('Example House');
+        $house->setPrice(1000);
+        $house->setHouseType($houseType);
         // ... Set other properties as needed
         $entityRepositoryMock = $this->createMock(\Doctrine\ORM\EntityRepository::class);
         $entityRepositoryMock->method('find')
@@ -66,9 +72,13 @@ class GenericIndexerTest extends TestCase
     public function testRemoveHouse()
     {
         // Création d'une instance de House pour simuler la suppression
-        $houseId = 1;
+        $houseType = new HouseType();
+        $houseType->setTypeName('Example Type');
+
         $house = new House();
         $house->setName('Example House');
+        $house->setPrice(1000);
+        $house->setHouseType($houseType);
 
         // Configuration du client de recherche pour vérifier les appels
         $this->searchClient->expects($this->once())

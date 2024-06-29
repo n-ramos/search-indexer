@@ -17,6 +17,9 @@ class HouseType
     #[ORM\Column(type: 'string')]
     private $typeName;
 
+    #[ORM\OneToMany(targetEntity: House::class, mappedBy: 'houseType')]
+    private $houses;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -32,4 +35,21 @@ class HouseType
         $this->typeName = $typeName;
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getHouses()
+    {
+        return $this->houses;
+    }
+
+    /**
+     * @param mixed $houses
+     */
+    public function setHouses($houses): void
+    {
+        $this->houses = $houses;
+    }
+
 }

@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.2/phpunit.xsd" bootstrap="vendor/autoload.php" colors="true" beStrictAboutTestsThatDoNotTestAnything="true" beStrictAboutOutputDuringTests="true" beStrictAboutChangesToGlobalState="true" cacheDirectory=".phpunit.cache">
-  <testsuites>
-    <testsuite name="Project Test Suite">
-      <directory>./tests</directory>
-    </testsuite>
-  </testsuites>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.2/phpunit.xsd" executionOrder="depends,defects" beStrictAboutOutputDuringTests="true" cacheDirectory=".phpunit.cache" requireCoverageMetadata="false" beStrictAboutCoverageMetadata="false">
+  <coverage includeUncoveredFiles="true">
+    <report>
+      <html outputDirectory="tests/coverage"/>
+    </report>
+  </coverage>
+  <logging/>
   <php>
     <ini name="error_reporting" value="-1"/>
-    <ini name="memory_limit" value="512M"/>
-    <env name="APP_ENV" value="test"/>
-    <env name="SHELL_VERBOSITY" value="-1"/>
-    <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0"/>
-    <env name="DATABASE_URL" value="sqlite:///:memory:" />
+    <env name="DATABASE_URL" value="sqlite:///:memory:"/>
+    <server name="APP_ENV" value="test" force="true"/>
+    <server name="SHELL_VERBOSITY" value="-1"/>
+    <server name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
   </php>
+  <testsuites>
+    <testsuite name="AuditBundle test suite">
+      <directory suffix="Test.php">tests</directory>
+    </testsuite>
+  </testsuites>
   <source>
     <include>
-      <directory>./src</directory>
+      <directory suffix=".php">src</directory>
     </include>
   </source>
 </phpunit>

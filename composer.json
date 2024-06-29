@@ -28,6 +28,9 @@
       "Nramos\\SearchIndexer\\Tests\\": "tests/"
     }
   },
+  "scripts": {
+    "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always"
+  },
   "authors": [
     {
       "name": "Nicolas Ramos",

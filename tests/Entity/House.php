@@ -24,6 +24,10 @@ class House
     #[MapProperty(propertyName: 'name', filterable: false, sortable: true)]
     private $price;
 
+    #[ORM\ManyToOne(targetEntity: HouseType::class)]
+    #[ORM\JoinColumn(name: 'house_type_id', referencedColumnName: 'id')]
+    #[MapProperty(propertyName: 'type', filterable: true, sortable: false)]
+    private $houseType;
     public function getId(): ?int
     {
         return $this->id;
@@ -39,4 +43,37 @@ class House
         $this->name = $name;
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    /**
+     * @param mixed $price
+     */
+    public function setPrice($price): void
+    {
+        $this->price = $price;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getHouseType()
+    {
+        return $this->houseType;
+    }
+
+    /**
+     * @param mixed $houseType
+     */
+    public function setHouseType($houseType): void
+    {
+        $this->houseType = $houseType;
+    }
+
 }
