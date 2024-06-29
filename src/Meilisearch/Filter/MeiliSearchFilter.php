@@ -37,7 +37,7 @@ class MeiliSearchFilter implements SearchFilterInterface
         $this->filters[] = [
             'type' => 'location',
             'location_type' => $type,
-            'coordinates' => [$lat,$lng, $radius],
+            'coordinates' => [$lat, $lng, $radius],
             'unit' => $unit,
             'separator' => $separator,
         ];
@@ -84,40 +84,45 @@ class MeiliSearchFilter implements SearchFilterInterface
             switch ($filter['type']) {
                 case 'basic':
                     $value = '"' . $filter['value'] . '"';
-                    $filterStrings[] = sprintf('%s %s %s %s', $filter['field'], $filter['operator'], $value, $filter['separator']);
+                    $filterStrings[] = sprintf('%s %s %s', $filter['field'], $filter['operator'], $value);
                     break;
                 case 'in':
                     $values = '[' . implode(', ', array_map(function($val) {
                             return '"' . $val . '"';
                         }, $filter['values'])) . ']';
-                    $filterStrings[] = sprintf('%s IN %s %s', $filter['field'], $values, $filter['separator']);
+                    $filterStrings[] = sprintf('%s IN %s', $filter['field'], $values);
                     break;
                 case 'location':
-                    if ($filter['location_type'] === '_geoRadius') {
-                        $filterStrings[] = sprintf('_geoRadius(%f, %f, %d%s) %s',
-                            $filter['coordinates'][0], $filter['coordinates'][1], $filter['coordinates'][2], $filter['unit'], $filter['separator']);
-                    } elseif ($filter['location_type'] === '_geoBoundingBox') {
-                        $filterStrings[] = sprintf('_geoBoundingBox([%f, %f], [%f, %f]) %s',
-                            $filter['coordinates'][0], $filter['coordinates'][1], $filter['coordinates'][2], $filter['coordinates'][3], $filter['separator']);
+                    if ($filter['location_type'] === 'radius') {
+                        $filterStrings[] = sprintf('_geoRadius(%f, %f, %d%s)',
+                            $filter['coordinates'][0], $filter['coordinates'][1], $filter['coordinates'][2], $filter['unit']);
+                    } elseif ($filter['location_type'] === 'bounding') {
+                        $filterStrings[] = sprintf('_geoBoundingBox([%f, %f], [%f, %f])',
+                            $filter['coordinates'][0], $filter['coordinates'][1], $filter['coordinates'][2], $filter['coordinates'][3]);
                     }
                     break;
                 case 'existence':
                     $operator = $filter['exists'] ? 'EXISTS' : 'NOT EXISTS';
-                    $filterStrings[] = sprintf('%s %s %s', $filter['field'], $operator, $filter['separator']);
+                    $filterStrings[] = sprintf('%s %s', $filter['field'], $operator);
                     break;
                 case 'parenthesis':
-                    $filterStrings[] = $filter['value'] . ' ';
+                    $filterStrings[] = $filter['value'];
                     break;
             }
         }
 
         // Ajouter les séparateurs appropriés aux filtres
+        $result = '';
         foreach ($filterStrings as $index => $filterString) {
-            if ($index > 0 && !str_ends_with(trim($filterStrings[$index - 1]), '(') && !str_starts_with(trim($filterString), ')')) {
-                $filterStrings[$index] = $this->filters[$index]['separator'] . ' ' . $filterString;
+            if ($index > 0) {
+                $separator = $this->filters[$index - 1]['separator'];
+                if ($result !== '' && !str_ends_with(trim($result), '(') && !str_starts_with(trim($filterString), ')')) {
+                    $result .= ' ' . $separator . ' ';
+                }
             }
+            $result .= $filterString;
         }
 
-        return rtrim(implode(' ', $filterStrings), ' AND OR');
+        return $result;
     }
 }
