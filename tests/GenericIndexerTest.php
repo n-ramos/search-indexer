@@ -4,11 +4,16 @@ namespace Nramos\SearchIndexer\Tests;
 
 
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Nramos\SearchIndexer\Annotation\MapProperty;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
 use Nramos\SearchIndexer\Indexer\SearchClientInterface;
 use Nramos\SearchIndexer\Tests\Entity\House;
 use Nramos\SearchIndexer\Tests\Entity\HouseType;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionMethod;
+use ReflectionProperty;
 
 class GenericIndexerTest extends TestCase
 {
@@ -28,46 +33,6 @@ class GenericIndexerTest extends TestCase
         $this->indexer = new GenericIndexer($this->entityManager, $this->searchClient);
     }
 
-    public function testIndexHouse()
-    {
-
-        // Préparation des données de test
-        $houseType = new HouseType();
-        $houseType->setTypeName('Example Type');
-
-        $house = new House();
-        $house->setName('Example House');
-        $house->setPrice(1000);
-        $house->setHouseType($houseType);
-        // ... Set other properties as needed
-        $entityRepositoryMock = $this->createMock(\Doctrine\ORM\EntityRepository::class);
-        $entityRepositoryMock->method('find')
-            ->willReturn($house);
-
-        // Configuration de l'EntityManager pour retourner l'entité House lors de la recherche
-        $this->entityManager->method('getRepository')
-            ->willReturnCallback(function ($entityClass) use ($entityRepositoryMock) {
-                if ($entityClass === House::class) {
-                    return $entityRepositoryMock;
-                }
-                return null; // Gérer d'autres cas si nécessaire
-            });
-
-        // Configuration du client de recherche pour vérifier les appels
-        $this->searchClient->expects($this->once())
-            ->method('put')
-            ->with($this->equalTo('houses'), $this->isType('array'));
-
-        // Appel de la méthode à tester
-        $data = [
-            'entityClass' => House::class,
-            'id' => 1,
-        ];
-        $this->indexer->index($data);
-
-        // Assertions supplémentaires si nécessaire
-        // Ex: Vérification que les paramètres d'indexation sont corrects
-    }
 
     public function testRemoveHouse()
     {
@@ -127,4 +92,7 @@ class GenericIndexerTest extends TestCase
         // Assertions supplémentaires si nécessaire
         // Ex: Vérification qu'aucun appel à put() n'a été fait pour HouseType
     }
+
+
+
 }

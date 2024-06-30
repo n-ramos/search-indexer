@@ -18,15 +18,15 @@ class House
 
     #[ORM\Column(type: 'string')]
     #[MapProperty(propertyName: 'name', filterable: true, sortable: false)]
-    private $name;
+    private ?string $name = null;
 
     #[ORM\Column(type: 'integer')]
-    #[MapProperty(propertyName: 'name', filterable: false, sortable: true)]
+    #[MapProperty(propertyName: 'price', filterable: false, sortable: true)]
     private $price;
 
     #[ORM\ManyToOne(targetEntity: HouseType::class)]
     #[ORM\JoinColumn(name: 'house_type_id', referencedColumnName: 'id')]
-    #[MapProperty(propertyName: 'type', filterable: true, sortable: false)]
+    #[MapProperty(propertyName: 'type', relationProperties: ['typeName'] , filterable: true, sortable: false)]
     private $houseType;
     public function getId(): ?int
     {
@@ -74,6 +74,14 @@ class House
     public function setHouseType($houseType): void
     {
         $this->houseType = $houseType;
+    }
+
+    /**
+     * @param mixed $id
+     */
+    public function setId($id): void
+    {
+        $this->id = $id;
     }
 
 }

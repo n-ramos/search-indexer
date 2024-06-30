@@ -15,7 +15,7 @@ class HouseType
     private $id;
 
     #[ORM\Column(type: 'string')]
-    private $typeName;
+    private $typeName = null;
 
     #[ORM\OneToMany(targetEntity: House::class, mappedBy: 'houseType')]
     private $houses;
@@ -50,6 +50,14 @@ class HouseType
     public function setHouses($houses): void
     {
         $this->houses = $houses;
+    }
+
+    /**
+     * @param mixed $id
+     */
+    public function setId($id): void
+    {
+        $this->id = $id;
     }
 
 }
