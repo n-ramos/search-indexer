@@ -32,6 +32,7 @@ class SearchIndexerSubscriberTest extends TestCase
             ->method('getObject')
             ->willReturn($house); // Mock your entity with ID 1
 
+
         $subscriber = new SearchIndexerSubscriber($indexerMock);
         $subscriber->postPersist($argsMock);
     }

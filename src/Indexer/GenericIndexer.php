@@ -149,7 +149,7 @@ class GenericIndexer implements IndexerInterface
         }
     }
 
-    private function updateIndexSettings(string $entityClass): void
+    public function updateIndexSettings(string $entityClass): void
     {
         $indexName = $this->getIndexName($entityClass);
 

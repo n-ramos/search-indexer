@@ -118,5 +118,18 @@ class GenericIndexerTest extends TestCase
         $this->assertEquals('Example Type', $data['type']);
     }
 
+    public function testCleanIndex()
+    {
+        // Configuration du client de recherche pour vérifier les appels
+        $this->searchClient->expects($this->once())
+            ->method('clear')
+            ->with($this->equalTo('houses'));
+
+        // Appel de la méthode à tester
+        $this->indexer->clean(House::class);
+
+    }
+
+
 
 }
