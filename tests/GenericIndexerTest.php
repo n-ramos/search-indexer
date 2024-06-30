@@ -93,6 +93,30 @@ class GenericIndexerTest extends TestCase
         // Ex: Vérification qu'aucun appel à put() n'a été fait pour HouseType
     }
 
+    public function testExtractData()
+    {
+        // Création d'une instance de House pour tester l'extraction de données
+        $houseType = new HouseType();
+        $houseType->setTypeName('Example Type');
+
+        $house = new House();
+        $house->setName('Example House');
+        $house->setPrice(1000);
+        $house->setHouseType($houseType);
+
+        // Appel de la méthode à tester
+        $data = $this->indexer->extractData($house);
+
+        // Assertions sur les données extraites
+        $this->assertArrayHasKey('name', $data);
+        $this->assertEquals('Example House', $data['name']);
+
+        $this->assertArrayHasKey('price', $data);
+        $this->assertEquals(1000, $data['price']);
+
+        $this->assertArrayHasKey('type', $data);
+        $this->assertEquals('Example Type', $data['type']);
+    }
 
 
 }

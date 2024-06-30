@@ -45,7 +45,7 @@ class GenericIndexer implements IndexerInterface
         $this->client->clear($indexName);
     }
 
-    private function extractData($entity): array
+    public function extractData($entity): array
     {
         $reflectionClass = new ReflectionClass($entity);
         $data = [];
@@ -85,14 +85,14 @@ class GenericIndexer implements IndexerInterface
         return $data;
     }
 
-    private function getRelationPropertiesValue($entity, array $propertyNames): array
+    public function getRelationPropertiesValue($entity, array $propertyNames): array
     {
         // Initialiser le proxy si nécessaire
         if ($entity instanceof Proxy) {
             $this->em->initializeObject($entity);
         }
 
-        $reflectionClass = new ReflectionClass($this->em->getClassMetadata($entity::class)->name);
+        $reflectionClass = new ReflectionClass($entity);
         $values = [];
         foreach ($propertyNames as $propertyName) {
 
@@ -104,7 +104,7 @@ class GenericIndexer implements IndexerInterface
         return $values;
     }
 
-    private function getIndexName(string $entityClass): string
+    public function getIndexName(string $entityClass): string
     {
         $reflectionClass = new ReflectionClass($entityClass);
         $attributes = $reflectionClass->getAttributes(Map::class);
