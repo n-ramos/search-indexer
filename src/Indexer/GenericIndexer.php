@@ -6,8 +6,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Proxy;
 use Exception;
 use InvalidArgumentException;
-use Nramos\SearchIndexer\Annotation\IndexCondition;
-use Nramos\SearchIndexer\Annotation\IndexConditionInterface;
 use Nramos\SearchIndexer\Annotation\Map;
 use Nramos\SearchIndexer\Annotation\MapProperty;
 use ReflectionClass;
@@ -22,18 +20,21 @@ class GenericIndexer implements IndexerInterface
         private readonly SearchClientInterface $client
     ) {}
 
-    public function index(array $data): void
+    public function index(array $data): bool
     {
         $entityClass = $data['entityClass'];
         $entity = $this->em->getRepository($entityClass)->find($data['id']);
-
-        if ($entity && $this->shouldIndexEntity($entity)) {
+        if (null !== $entity) {
             $indexName = $this->getIndexName($entityClass);
             $indexData = $this->extractData($entity);
             $this->client->put($indexName, [$indexData]);
 
             $this->updateIndexSettings($entityClass);
+
+            return true;
         }
+
+        return false;
     }
 
     public function remove(int $id, string $entityClass): void
@@ -151,35 +152,6 @@ class GenericIndexer implements IndexerInterface
 
         // Réinitialiser les paramètres de l'index pour la prochaine utilisation
         $this->indexSettings = [];
-    }
-
-    private function shouldIndexEntity(object $entity): bool
-    {
-        if (!\is_object($entity)) {
-            throw new InvalidArgumentException('The entity must be an object.');
-        }
-
-        $reflectionClass = new ReflectionClass($entity);
-        $attributes = $reflectionClass->getAttributes(IndexCondition::class);
-
-        if ([] !== $attributes) {
-            $annotation = $attributes[0]->newInstance();
-            $conditionClass = $annotation->conditionClass;
-            if ($conditionClass) {
-                if (!class_exists($conditionClass)) {
-                    throw new InvalidArgumentException(sprintf('The condition class %s does not exist.', $conditionClass));
-                }
-
-                $condition = new $conditionClass();
-                if (!$condition instanceof IndexConditionInterface) {
-                    throw new Exception(sprintf('Condition class %s must implement IndexConditionInterface.', $conditionClass));
-                }
-
-                return $condition($entity);
-            }
-        }
-
-        return true; // Par défaut, on indexe l'entité si aucune condition n'est spécifiée
     }
 
     private function addIndexSettings(MapProperty $annotation, string $propertyName): void
