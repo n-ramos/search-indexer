@@ -10,6 +10,5 @@ class Map
     public function __construct(
         public string $indexName,
         public bool $autoIndex = true
-    ) {
-    }
+    ) {}
 }

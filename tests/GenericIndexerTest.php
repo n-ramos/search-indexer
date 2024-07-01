@@ -2,20 +2,21 @@
 
 namespace Nramos\SearchIndexer\Tests;
 
-
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Nramos\SearchIndexer\Annotation\MapProperty;
+use Doctrine\ORM\EntityRepository;
+use Exception;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
 use Nramos\SearchIndexer\Indexer\SearchClientInterface;
 use Nramos\SearchIndexer\Tests\Entity\House;
 use Nramos\SearchIndexer\Tests\Entity\HouseType;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionProperty;
 
-class GenericIndexerTest extends TestCase
+/**
+ * @internal
+ *
+ */
+#[Small] final class GenericIndexerTest extends TestCase
 {
     private EntityManagerInterface $entityManager;
     private SearchClientInterface $searchClient;
@@ -33,7 +34,6 @@ class GenericIndexerTest extends TestCase
         $this->indexer = new GenericIndexer($this->entityManager, $this->searchClient);
     }
 
-
     public function testRemoveHouse()
     {
         // Création d'une instance de House pour simuler la suppression
@@ -46,9 +46,10 @@ class GenericIndexerTest extends TestCase
         $house->setHouseType($houseType);
 
         // Configuration du client de recherche pour vérifier les appels
-        $this->searchClient->expects($this->once())
+        $this->searchClient->expects(self::once())
             ->method('delete')
-            ->with($this->equalTo('houses'), $this->equalTo(1));
+            ->with(self::equalTo('houses'), self::equalTo(1))
+        ;
 
         // Appel de la méthode à tester
         $this->indexer->remove(1, House::class);
@@ -64,23 +65,26 @@ class GenericIndexerTest extends TestCase
         $houseType->setTypeName('Example Type');
 
         // Configuration du mock EntityManager pour retourner une EntityRepository valide
-        $entityRepositoryMock = $this->createMock(\Doctrine\ORM\EntityRepository::class);
+        $entityRepositoryMock = $this->createMock(EntityRepository::class);
         $entityRepositoryMock->method('find')
-            ->willReturn($houseType); // Simule que HouseType est récupéré
+            ->willReturn($houseType) // Simule que HouseType est récupéré
+        ;
 
         $this->entityManager->method('getRepository')
-            ->willReturnCallback(function ($entityClass) use ($entityRepositoryMock) {
-                if ($entityClass === HouseType::class) {
+            ->willReturnCallback(static function ($entityClass) use ($entityRepositoryMock) {
+                if (HouseType::class === $entityClass) {
                     return $entityRepositoryMock;
                 }
-                return null; // Gérer d'autres cas si nécessaire
-            });
+                 // Gérer d'autres cas si nécessaire
+            })
+        ;
 
         // Configuration du client de recherche - on ne s'attend pas à ce que put() soit appelé
-        $this->searchClient->expects($this->never())
-            ->method('put');
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage("Entity class " . HouseType::class . " is not mapped to an index.");
+        $this->searchClient->expects(self::never())
+            ->method('put')
+        ;
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Entity class '.HouseType::class.' is not mapped to an index.');
 
         // Appel de la méthode à tester
         $data = [
@@ -108,28 +112,25 @@ class GenericIndexerTest extends TestCase
         $data = $this->indexer->extractData($house);
 
         // Assertions sur les données extraites
-        $this->assertArrayHasKey('name', $data);
-        $this->assertEquals('Example House', $data['name']);
+        self::assertArrayHasKey('name', $data);
+        self::assertSame('Example House', $data['name']);
 
-        $this->assertArrayHasKey('price', $data);
-        $this->assertEquals(1000, $data['price']);
+        self::assertArrayHasKey('price', $data);
+        self::assertSame(1000, $data['price']);
 
-        $this->assertArrayHasKey('type', $data);
-        $this->assertEquals('Example Type', $data['type']);
+        self::assertArrayHasKey('type', $data);
+        self::assertSame('Example Type', $data['type']);
     }
 
     public function testCleanIndex()
     {
         // Configuration du client de recherche pour vérifier les appels
-        $this->searchClient->expects($this->once())
+        $this->searchClient->expects(self::once())
             ->method('clear')
-            ->with($this->equalTo('houses'));
+            ->with(self::equalTo('houses'))
+        ;
 
         // Appel de la méthode à tester
         $this->indexer->clean(House::class);
-
     }
-
-
-
 }

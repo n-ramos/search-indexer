@@ -6,8 +6,9 @@ use Nramos\SearchIndexer\Filter\SearchFilterInterface;
 
 class MeiliSearchFilter implements SearchFilterInterface
 {
-    private $filters = [];
-    private $separatorStack = [];
+    private array $filters = [];
+
+    private array $separatorStack = [];
 
     public function addFilter(string $field, string $operator, $value, string $separator = 'AND'): self
     {
@@ -18,6 +19,7 @@ class MeiliSearchFilter implements SearchFilterInterface
             'value' => $value,
             'separator' => $separator,
         ];
+
         return $this;
     }
 
@@ -29,6 +31,7 @@ class MeiliSearchFilter implements SearchFilterInterface
             'values' => $values,
             'separator' => $separator,
         ];
+
         return $this;
     }
 
@@ -41,6 +44,7 @@ class MeiliSearchFilter implements SearchFilterInterface
             'unit' => $unit,
             'separator' => $separator,
         ];
+
         return $this;
     }
 
@@ -52,6 +56,7 @@ class MeiliSearchFilter implements SearchFilterInterface
             'exists' => $exists,
             'separator' => $separator,
         ];
+
         return $this;
     }
 
@@ -63,6 +68,7 @@ class MeiliSearchFilter implements SearchFilterInterface
             'separator' => $separator,
         ];
         $this->separatorStack[] = $separator;
+
         return $this;
     }
 
@@ -74,6 +80,7 @@ class MeiliSearchFilter implements SearchFilterInterface
             'value' => ')',
             'separator' => $separator,
         ];
+
         return $this;
     }
 
@@ -83,30 +90,47 @@ class MeiliSearchFilter implements SearchFilterInterface
         foreach ($this->filters as $filter) {
             switch ($filter['type']) {
                 case 'basic':
-                    $value = '"' . $filter['value'] . '"';
+                    $value = '"'.$filter['value'].'"';
                     $filterStrings[] = sprintf('%s %s %s', $filter['field'], $filter['operator'], $value);
+
                     break;
+
                 case 'in':
-                    $values = '[' . implode(', ', array_map(function($val) {
-                            return '"' . $val . '"';
-                        }, $filter['values'])) . ']';
+                    $values = '['.implode(', ', array_map(static fn($val): string => '"'.$val.'"', $filter['values'])).']';
                     $filterStrings[] = sprintf('%s IN %s', $filter['field'], $values);
+
                     break;
+
                 case 'location':
-                    if ($filter['location_type'] === 'radius') {
-                        $filterStrings[] = sprintf('_geoRadius(%f, %f, %d%s)',
-                            $filter['coordinates'][0], $filter['coordinates'][1], $filter['coordinates'][2], $filter['unit']);
-                    } elseif ($filter['location_type'] === 'bounding') {
-                        $filterStrings[] = sprintf('_geoBoundingBox([%f, %f], [%f, %f])',
-                            $filter['coordinates'][0], $filter['coordinates'][1], $filter['coordinates'][2], $filter['coordinates'][3]);
+                    if ('radius' === $filter['location_type']) {
+                        $filterStrings[] = sprintf(
+                            '_geoRadius(%f, %f, %d%s)',
+                            $filter['coordinates'][0],
+                            $filter['coordinates'][1],
+                            $filter['coordinates'][2],
+                            $filter['unit']
+                        );
+                    } elseif ('bounding' === $filter['location_type']) {
+                        $filterStrings[] = sprintf(
+                            '_geoBoundingBox([%f, %f], [%f, %f])',
+                            $filter['coordinates'][0],
+                            $filter['coordinates'][1],
+                            $filter['coordinates'][2],
+                            $filter['coordinates'][3]
+                        );
                     }
+
                     break;
+
                 case 'existence':
                     $operator = $filter['exists'] ? 'EXISTS' : 'NOT EXISTS';
                     $filterStrings[] = sprintf('%s %s', $filter['field'], $operator);
+
                     break;
+
                 case 'parenthesis':
                     $filterStrings[] = $filter['value'];
+
                     break;
             }
         }
@@ -116,10 +140,11 @@ class MeiliSearchFilter implements SearchFilterInterface
         foreach ($filterStrings as $index => $filterString) {
             if ($index > 0) {
                 $separator = $this->filters[$index - 1]['separator'];
-                if ($result !== '' && !str_ends_with(trim($result), '(') && !str_starts_with(trim($filterString), ')')) {
-                    $result .= ' ' . $separator . ' ';
+                if ('' !== $result && !str_ends_with(trim($result), '(') && !str_starts_with(trim((string) $filterString), ')')) {
+                    $result .= ' '.$separator.' ';
                 }
             }
+
             $result .= $filterString;
         }
 

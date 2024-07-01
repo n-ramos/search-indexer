@@ -2,7 +2,6 @@
 
 namespace Nramos\SearchIndexer\Tests\Entity;
 
-
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -15,7 +14,7 @@ class HouseType
     private $id;
 
     #[ORM\Column(type: 'string')]
-    private $typeName = null;
+    private $typeName;
 
     #[ORM\OneToMany(targetEntity: House::class, mappedBy: 'houseType')]
     private $houses;
@@ -33,31 +32,22 @@ class HouseType
     public function setTypeName(string $typeName): self
     {
         $this->typeName = $typeName;
+
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getHouses()
+    public function getHouses(): mixed
     {
         return $this->houses;
     }
 
-    /**
-     * @param mixed $houses
-     */
-    public function setHouses($houses): void
+    public function setHouses(mixed $houses): void
     {
         $this->houses = $houses;
     }
 
-    /**
-     * @param mixed $id
-     */
-    public function setId($id): void
+    public function setId(mixed $id): void
     {
         $this->id = $id;
     }
-
 }

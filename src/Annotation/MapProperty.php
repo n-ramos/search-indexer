@@ -10,9 +10,8 @@ class MapProperty
     public function __construct(
         public string $propertyName,
         public array $relationProperties = [],
-         public bool $filterable = false,
+        public bool $filterable = false,
         public bool $sortable = false,
         public bool $searchable = true
-    ) {
-    }
+    ) {}
 }

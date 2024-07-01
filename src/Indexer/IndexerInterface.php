@@ -2,7 +2,4 @@
 
 namespace Nramos\SearchIndexer\Indexer;
 
-interface IndexerInterface
-{
-
-}
+interface IndexerInterface {}

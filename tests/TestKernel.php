@@ -2,7 +2,7 @@
 
 namespace Nramos\SearchIndexer\Tests;
 
-
+use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -16,9 +16,19 @@ class TestKernel extends BaseKernel
     public function registerBundles(): iterable
     {
         return [
-            new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+            new FrameworkBundle(),
             // Ajoutez d'autres bundles nécessaires pour vos tests
         ];
+    }
+
+    public function getCacheDir(): string
+    {
+        return __DIR__.'/cache/'.$this->environment;
+    }
+
+    public function getLogDir(): string
+    {
+        return __DIR__.'/logs';
     }
 
     protected function configureRoutes(RoutingConfigurator $routes)
@@ -33,15 +43,5 @@ class TestKernel extends BaseKernel
             'secret' => 'S3cr3t',
             // Autres configurations Symfony si nécessaires
         ]);
-    }
-
-    public function getCacheDir(): string
-    {
-        return __DIR__ . '/cache/' . $this->environment;
-    }
-
-    public function getLogDir(): string
-    {
-        return __DIR__ . '/logs';
     }
 }
