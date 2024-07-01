@@ -5,7 +5,7 @@ namespace Nramos\SearchIndexer\Annotation;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-class Map
+class SearchIndex
 {
     public function __construct(
         public string $indexName,

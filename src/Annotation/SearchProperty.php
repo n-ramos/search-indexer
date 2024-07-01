@@ -5,7 +5,7 @@ namespace Nramos\SearchIndexer\Annotation;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
-class MapProperty
+class SearchProperty
 {
     public function __construct(
         public string $propertyName,

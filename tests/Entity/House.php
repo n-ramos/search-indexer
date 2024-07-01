@@ -3,13 +3,13 @@
 namespace Nramos\SearchIndexer\Tests\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Nramos\SearchIndexer\Annotation\Map;
-use Nramos\SearchIndexer\Annotation\MapProperty;
+use Nramos\SearchIndexer\Annotation\SearchIndex;
+use Nramos\SearchIndexer\Annotation\SearchProperty;
 use Nramos\SearchIndexer\Indexer\IndexableEntityInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'houses')]
-#[Map(indexName: 'houses', autoIndex: true)]
+#[SearchIndex(indexName: 'houses', autoIndex: true)]
 class House implements IndexableEntityInterface
 {
     #[ORM\Id]
@@ -18,16 +18,16 @@ class House implements IndexableEntityInterface
     private $id;
 
     #[ORM\Column(type: 'string')]
-    #[MapProperty(propertyName: 'name', filterable: true, sortable: false)]
+    #[SearchProperty(propertyName: 'name', filterable: true, sortable: false)]
     private ?string $name = null;
 
     #[ORM\Column(type: 'integer')]
-    #[MapProperty(propertyName: 'price', filterable: false, sortable: true)]
+    #[SearchProperty(propertyName: 'price', filterable: false, sortable: true)]
     private $price;
 
     #[ORM\ManyToOne(targetEntity: HouseType::class)]
     #[ORM\JoinColumn(name: 'house_type_id', referencedColumnName: 'id')]
-    #[MapProperty(propertyName: 'type', relationProperties: ['typeName'], filterable: true, sortable: false)]
+    #[SearchProperty(propertyName: 'type', relationProperties: ['typeName'], filterable: true, sortable: false)]
     private $houseType;
 
     public function getId(): ?int

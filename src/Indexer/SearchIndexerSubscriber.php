@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Exception;
-use Nramos\SearchIndexer\Annotation\Map;
+use Nramos\SearchIndexer\Annotation\SearchIndex;
 use Nramos\SearchIndexer\Tests\Indexer\SearchIndexerSubscriberTest;
 use ReflectionClass;
 
@@ -64,7 +64,7 @@ class SearchIndexerSubscriber
         $reflectionClass = new ReflectionClass($entity);
 
         try {
-            if ($reflectionClass->getAttributes(Map::class) && $reflectionClass->getAttributes(Map::class)[0]->newInstance()->autoIndex) {
+            if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
                 $this->indexer->index([
                     'entityClass' => $entity::class,
                     'id' => $entity->getId(),

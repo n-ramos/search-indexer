@@ -6,8 +6,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Proxy;
 use Exception;
 use InvalidArgumentException;
-use Nramos\SearchIndexer\Annotation\Map;
-use Nramos\SearchIndexer\Annotation\MapProperty;
+use Nramos\SearchIndexer\Annotation\SearchIndex;
+use Nramos\SearchIndexer\Annotation\SearchProperty;
 use ReflectionClass;
 use ReflectionException;
 
@@ -62,7 +62,7 @@ class GenericIndexer implements IndexerInterface
         $data = [];
 
         foreach ($reflectionClass->getProperties() as $property) {
-            $attributes = $property->getAttributes(MapProperty::class);
+            $attributes = $property->getAttributes(SearchProperty::class);
             if ($attributes) {
                 $property->setAccessible(true);
                 $annotation = $attributes[0]->newInstance();
@@ -130,7 +130,7 @@ class GenericIndexer implements IndexerInterface
         }
 
         $reflectionClass = new ReflectionClass($entityClass);
-        $attributes = $reflectionClass->getAttributes(Map::class);
+        $attributes = $reflectionClass->getAttributes(SearchIndex::class);
 
         if ([] === $attributes) {
             throw new Exception(sprintf('Entity class %s is not mapped to an index.', $entityClass));
@@ -154,7 +154,7 @@ class GenericIndexer implements IndexerInterface
         $this->indexSettings = [];
     }
 
-    private function addIndexSettings(MapProperty $annotation, string $propertyName): void
+    private function addIndexSettings(SearchProperty $annotation, string $propertyName): void
     {
         if ($annotation->filterable) {
             $this->indexSettings['filterable'][] = $propertyName;
