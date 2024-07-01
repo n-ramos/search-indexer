@@ -17,9 +17,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class IndexEntitiesCommand extends Command
 {
+    private readonly \Doctrine\ORM\EntityManagerInterface $entityManager;
 
-    private $entityManager;
-    private $indexer;
+    private readonly \Nramos\SearchIndexer\Indexer\GenericIndexer $indexer;
 
     public function __construct(EntityManagerInterface $entityManager, GenericIndexer $indexer)
     {
@@ -32,8 +32,10 @@ class IndexEntitiesCommand extends Command
     {
         $this
             ->setDescription('Indexes specified entities or all entities if none specified')
-            ->addArgument('entityClass', InputArgument::OPTIONAL, 'The entity class to index');
+            ->addArgument('entityClass', InputArgument::OPTIONAL, 'The entity class to index')
+        ;
     }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $entityClass = $input->getArgument('entityClass');
@@ -53,15 +55,14 @@ class IndexEntitiesCommand extends Command
         $entities = $repository->findAll();
 
         foreach ($entities as $entity) {
-
             $this->indexer->index(['entityClass' => $entityClass, 'id' => $entity->getId()]);
         }
 
         $output->writeln(sprintf('Indexed all entities of class %s.', $entityClass));
     }
+
     private function removeEntities(string $entityClass, OutputInterface $output): void
     {
-
         $this->indexer->clean($entityClass);
 
         $output->writeln(sprintf('Indexed all entities of class %s.', $entityClass));

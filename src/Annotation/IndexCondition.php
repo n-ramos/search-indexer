@@ -9,6 +9,5 @@ class IndexCondition
 {
     public function __construct(
         public ?string $conditionClass = null
-    ) {
-    }
+    ) {}
 }

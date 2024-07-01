@@ -1,9 +1,12 @@
 <?php
+
 namespace Nramos\SearchIndexer;
+
 use Nramos\SearchIndexer\DependencyInjection\SearchBundleExtension;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
+use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
-class SearchBundle extends \Symfony\Component\HttpKernel\Bundle\AbstractBundle
+class SearchBundle extends AbstractBundle
 {
     public function getPath(): string
     {

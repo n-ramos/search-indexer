@@ -1,9 +1,12 @@
 <?php
+
 // src/Infrastructure/Search/GenericIndexer.php
+
 namespace Nramos\SearchIndexer\Indexer;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Proxy;
+use Exception;
 use Nramos\SearchIndexer\Annotation\IndexCondition;
 use Nramos\SearchIndexer\Annotation\IndexConditionInterface;
 use Nramos\SearchIndexer\Annotation\Map;
@@ -13,11 +16,11 @@ use ReflectionClass;
 class GenericIndexer implements IndexerInterface
 {
     private array $indexSettings = [];
+
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly SearchClientInterface $client
-    ) {
-    }
+    ) {}
 
     public function index(array $data): void
     {
@@ -65,23 +68,21 @@ class GenericIndexer implements IndexerInterface
                 if (!empty($annotation->relationProperties) && $value) {
                     if (is_iterable($value)) {
                         $data[$annotation->propertyName] = array_map(
-                            fn($relatedEntity) => $this->getRelationPropertiesValue($relatedEntity, $annotation->relationProperties),
+                            fn ($relatedEntity): array => $this->getRelationPropertiesValue($relatedEntity, $annotation->relationProperties),
                             $value->toArray()
                         );
                     } else {
                         $relationValues = $this->getRelationPropertiesValue($value, $annotation->relationProperties);
-                        if (count($relationValues) === 1) {
-                            $data[$annotation->propertyName] = reset($relationValues);
-                        } else {
-                            $data[$annotation->propertyName] = $relationValues;
-                        }
+                        $data[$annotation->propertyName] = 1 === \count($relationValues) ? reset($relationValues) : $relationValues;
                     }
                 } else {
                     $data[$annotation->propertyName] = $value;
                 }
+
                 $this->addIndexSettings($annotation, $annotation->propertyName);
             }
         }
+
         return $data;
     }
 
@@ -95,12 +96,12 @@ class GenericIndexer implements IndexerInterface
         $reflectionClass = new ReflectionClass($entity);
         $values = [];
         foreach ($propertyNames as $propertyName) {
-
             $property = $reflectionClass->getProperty($propertyName);
 
             $property->setAccessible(true);
             $values[$propertyName] = $property->getValue($entity);
         }
+
         return $values;
     }
 
@@ -109,12 +110,26 @@ class GenericIndexer implements IndexerInterface
         $reflectionClass = new ReflectionClass($entityClass);
         $attributes = $reflectionClass->getAttributes(Map::class);
 
-        if (!$attributes) {
-            throw new \Exception("Entity class {$entityClass} is not mapped to an index.");
+        if ($attributes === []) {
+            throw new Exception(sprintf('Entity class %s is not mapped to an index.', $entityClass));
         }
 
         $annotation = $attributes[0]->newInstance();
+
         return $annotation->indexName;
+    }
+
+    public function updateIndexSettings(string $entityClass): void
+    {
+        $indexName = $this->getIndexName($entityClass);
+
+        // Mettre à jour les paramètres de l'index sur le client de recherche
+        if ($this->indexSettings !== []) {
+            $this->client->updateSettings($indexName, $this->indexSettings);
+        }
+
+        // Réinitialiser les paramètres de l'index pour la prochaine utilisation
+        $this->indexSettings = [];
     }
 
     private function shouldIndexEntity(object $entity): bool
@@ -122,44 +137,34 @@ class GenericIndexer implements IndexerInterface
         $reflectionClass = new ReflectionClass($entity);
         $attributes = $reflectionClass->getAttributes(IndexCondition::class);
 
-        if ($attributes) {
+        if ($attributes !== []) {
             $annotation = $attributes[0]->newInstance();
             $conditionClass = $annotation->conditionClass;
             if ($conditionClass) {
                 $condition = new $conditionClass();
                 if (!$condition instanceof IndexConditionInterface) {
-                    throw new \Exception("Condition class {$conditionClass} must implement IndexConditionInterface.");
+                    throw new Exception(sprintf('Condition class %s must implement IndexConditionInterface.', $conditionClass));
                 }
+
                 return $condition($entity);
             }
         }
 
         return true; // Par défaut, on indexe l'entité si aucune condition n'est spécifiée
     }
+
     private function addIndexSettings(MapProperty $annotation, string $propertyName): void
     {
         if ($annotation->filterable) {
             $this->indexSettings['filterable'][] = $propertyName;
         }
+
         if ($annotation->sortable) {
             $this->indexSettings['sortable'][] = $propertyName;
         }
+
         if ($annotation->searchable) {
             $this->indexSettings['searchable'][] = $propertyName;
         }
     }
-
-    private function updateIndexSettings(string $entityClass): void
-    {
-        $indexName = $this->getIndexName($entityClass);
-
-        // Mettre à jour les paramètres de l'index sur le client de recherche
-        if (!empty($this->indexSettings)) {
-            $this->client->updateSettings($indexName, $this->indexSettings);
-        }
-
-        // Réinitialiser les paramètres de l'index pour la prochaine utilisation
-        $this->indexSettings = [];
-    }
 }
-
