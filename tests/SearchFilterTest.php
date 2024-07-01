@@ -8,7 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
  */
 #[Small] final class SearchFilterTest extends TestCase
 {

@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
  */
 #[Small] final class GenericIndexerTest extends TestCase
 {
@@ -75,7 +74,7 @@ use PHPUnit\Framework\TestCase;
                 if (HouseType::class === $entityClass) {
                     return $entityRepositoryMock;
                 }
-                 // Gérer d'autres cas si nécessaire
+                // Gérer d'autres cas si nécessaire
             })
         ;
 

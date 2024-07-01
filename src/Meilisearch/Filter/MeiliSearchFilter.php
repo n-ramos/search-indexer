@@ -10,7 +10,7 @@ class MeiliSearchFilter implements SearchFilterInterface
 
     private array $separatorStack = [];
 
-    public function addFilter(string $field, string $operator, $value, string $separator = 'AND'): self
+    public function addFilter(string $field, string $operator, mixed $value, string $separator = 'AND'): self
     {
         $this->filters[] = [
             'type' => 'basic',
@@ -96,7 +96,7 @@ class MeiliSearchFilter implements SearchFilterInterface
                     break;
 
                 case 'in':
-                    $values = '['.implode(', ', array_map(static fn($val): string => '"'.$val.'"', $filter['values'])).']';
+                    $values = '['.implode(', ', array_map(static fn ($val): string => '"'.$val.'"', $filter['values'])).']';
                     $filterStrings[] = sprintf('%s IN %s', $filter['field'], $values);
 
                     break;

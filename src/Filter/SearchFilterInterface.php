@@ -4,7 +4,7 @@ namespace Nramos\SearchIndexer\Filter;
 
 interface SearchFilterInterface
 {
-    public function addFilter(string $field, string $operator, $value, string $separator = 'AND'): self;
+    public function addFilter(string $field, string $operator, mixed $value, string $separator = 'AND'): self;
 
     public function addInFilter(string $field, array $values, string $separator = 'AND'): self;
 

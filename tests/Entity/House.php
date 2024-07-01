@@ -5,11 +5,12 @@ namespace Nramos\SearchIndexer\Tests\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Nramos\SearchIndexer\Annotation\Map;
 use Nramos\SearchIndexer\Annotation\MapProperty;
+use Nramos\SearchIndexer\Indexer\IndexableEntityInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'houses')]
 #[Map(indexName: 'houses', autoIndex: true)]
-class House
+class House implements IndexableEntityInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
