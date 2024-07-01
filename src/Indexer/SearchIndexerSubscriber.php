@@ -14,6 +14,7 @@ use ReflectionClass;
 /**
  * @see SearchIndexerSubscriberTest
  * @see SearchIndexerSubscriberTest
+ * @see SearchIndexerSubscriberTest
  */
 #[AsDoctrineListener(event: Events::postPersist, priority: 0, connection: 'default')]
 #[AsDoctrineListener(event: Events::postUpdate, priority: 0, connection: 'default')]
