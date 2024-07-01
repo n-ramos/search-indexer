@@ -10,6 +10,8 @@ interface SearchFilterInterface
 
     public function addLocationFilter(string $type, float $lat, float $lng, int $radius = 5, string $unit = 'km', string $separator = 'AND'): self;
 
+    public function addLocationBounding(string $type, array $coordinates, string $unit = 'm', string $separator = 'AND'): self;
+
     public function addExistenceFilter(string $field, bool $exists = true, string $separator = 'AND'): self;
 
     public function openParenthesis(string $separator = 'AND'): self;

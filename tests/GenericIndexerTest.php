@@ -74,7 +74,6 @@ use PHPUnit\Framework\TestCase;
                 if (HouseType::class === $entityClass) {
                     return $entityRepositoryMock;
                 }
-                // Gérer d'autres cas si nécessaire
             })
         ;
 
@@ -119,6 +118,46 @@ use PHPUnit\Framework\TestCase;
 
         self::assertArrayHasKey('type', $data);
         self::assertSame('Example Type', $data['type']);
+    }
+
+    public function testIndex()
+    {
+        // Création d'une instance de House pour tester l'indexation
+        $houseType = new HouseType();
+        $houseType->setTypeName('Example Type');
+
+        $house = new House();
+        $house->setName('Example House');
+        $house->setId(1);
+        $house->setPrice(1000);
+        $house->setHouseType($houseType);
+
+        $entityRepositoryMock = $this->createMock(EntityRepository::class);
+        $entityRepositoryMock->method('find')
+            ->willReturnCallback(static function ($id) use ($house) {
+                return 1 === $id ? $house : null;
+            })
+        ;
+
+        // Créez un mock de l'EntityManager
+        $entityManagerMock = $this->createMock(EntityManagerInterface::class);
+        $entityManagerMock->method('getRepository')
+            ->willReturnCallback(static function ($entityClass) use ($entityRepositoryMock) {
+                return $entityRepositoryMock;
+            })
+        ;
+
+        $indexer = new GenericIndexer($entityManagerMock, $this->searchClient);
+        $dataTrue = [
+            'entityClass' => House::class,
+            'id' => 1,
+        ];
+        $dataFalse = [
+            'entityClass' => House::class,
+            'id' => 2,
+        ];
+        self::assertTrue($indexer->index($dataTrue));
+        self::assertFalse($indexer->index($dataFalse));
     }
 
     public function testCleanIndex()
