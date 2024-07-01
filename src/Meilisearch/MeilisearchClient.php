@@ -16,37 +16,37 @@ class MeilisearchClient implements SearchClientInterface
 {
     public function __construct(private readonly string $host, private readonly string $apiKey, private readonly HttpClientInterface $client) {}
 
-    public function get(string $endpoint): array
+    public function get(string $endpoint): mixed
     {
         return $this->api($endpoint, [], 'GET');
     }
 
-    public function post(string $endpoint, array $data = []): array
+    public function post(string $endpoint, array $data = []): mixed
     {
         return $this->api($endpoint, $data, 'POST');
     }
 
-    public function put(string $index, array $data = []): array
+    public function put(string $index, array $data = []): mixed
     {
         return $this->api('indexes/'.$index.'/documents', $data, 'PUT');
     }
 
-    public function patch(string $endpoint, array $data = []): array
+    public function patch(string $endpoint, array $data = []): mixed
     {
         return $this->api($endpoint, $data, 'PATCH');
     }
 
-    public function delete(string $index, int $id): array
+    public function delete(string $index, int $id): mixed
     {
         return $this->api($index, ['id'], 'DELETE');
     }
 
-    public function clear(string $index): array
+    public function clear(string $index): mixed
     {
         return $this->api('indexes/'.$index.'/documents', [], 'DELETE');
     }
 
-    public function search(string $indexName, string $query, ?SearchFilterInterface $filters = null, int $limit = 10, int $page = 1, array $facets = []): array
+    public function search(string $indexName, string $query, ?SearchFilterInterface $filters = null, int $limit = 10, int $page = 1, array $facets = []): mixed
     {
         $dataToSend = [
             'q' => $query,
@@ -54,7 +54,7 @@ class MeilisearchClient implements SearchClientInterface
             'limit' => $limit,
             'page' => $page,
         ];
-        if ($filters instanceof \Nramos\SearchIndexer\Filter\SearchFilterInterface) {
+        if ($filters instanceof SearchFilterInterface) {
             $dataToSend['filter'] = $filters->toString();
         }
 
@@ -89,10 +89,10 @@ class MeilisearchClient implements SearchClientInterface
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      */
-    private function api(string $endpoint, array $data = [], string $method = 'POST'): array
+    private function api(string $endpoint, array $data = [], string $method = 'POST'): mixed
     {
         $headers = [];
-        if ($this->apiKey !== '' && $this->apiKey !== '0') {
+        if ('' !== $this->apiKey && '0' !== $this->apiKey) {
             $headers['Authorization'] = 'Bearer '.$this->apiKey;
         }
 

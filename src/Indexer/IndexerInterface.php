@@ -2,4 +2,7 @@
 
 namespace Nramos\SearchIndexer\Indexer;
 
-interface IndexerInterface {}
+interface IndexerInterface
+{
+    public function index(array $data): void;
+}

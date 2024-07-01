@@ -12,7 +12,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
  */
 #[Small] final class SearchIndexerSubscriberTest extends TestCase
 {
@@ -39,6 +38,31 @@ use PHPUnit\Framework\TestCase;
 
         $subscriber = new SearchIndexerSubscriber($indexerMock);
         $subscriber->postPersist($argsMock);
+    }
+
+    public function testPostUpdate()
+    {
+        $house = new House();
+        $house->setId(1);
+        // Créer un mock pour IndexerInterface
+        $indexerMock = $this->createMock(GenericIndexer::class);
+        $indexerMock->expects(self::once())
+            ->method('index')
+            ->with([
+                'entityClass' => 'Nramos\SearchIndexer\Tests\Entity\House',
+                'id' => 1,
+            ])
+        ;
+
+        // Créer un mock pour LifecycleEventArgs
+        $argsMock = $this->createMock(LifecycleEventArgs::class);
+        $argsMock->expects(self::once())
+            ->method('getObject')
+            ->willReturn($house) // Mock your entity with ID 1
+        ;
+
+        $subscriber = new SearchIndexerSubscriber($indexerMock);
+        $subscriber->postUpdate($argsMock);
     }
 
     public function testHouseTypeNotIndexed()

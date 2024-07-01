@@ -1,17 +1,17 @@
 <?php
 
-// src/Infrastructure/Search/GenericIndexer.php
-
 namespace Nramos\SearchIndexer\Indexer;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Proxy;
 use Exception;
+use InvalidArgumentException;
 use Nramos\SearchIndexer\Annotation\IndexCondition;
 use Nramos\SearchIndexer\Annotation\IndexConditionInterface;
 use Nramos\SearchIndexer\Annotation\Map;
 use Nramos\SearchIndexer\Annotation\MapProperty;
 use ReflectionClass;
+use ReflectionException;
 
 class GenericIndexer implements IndexerInterface
 {
@@ -36,7 +36,7 @@ class GenericIndexer implements IndexerInterface
         }
     }
 
-    public function remove(string $id, string $entityClass): void
+    public function remove(int $id, string $entityClass): void
     {
         $indexName = $this->getIndexName($entityClass);
         $this->client->delete($indexName, $id);
@@ -48,8 +48,15 @@ class GenericIndexer implements IndexerInterface
         $this->client->clear($indexName);
     }
 
-    public function extractData($entity): array
+    /**
+     * @throws ReflectionException
+     */
+    public function extractData(object $entity): array
     {
+        if (!\is_object($entity)) {
+            throw new InvalidArgumentException('The entity must be an object.');
+        }
+
         $reflectionClass = new ReflectionClass($entity);
         $data = [];
 
@@ -67,9 +74,12 @@ class GenericIndexer implements IndexerInterface
 
                 if (!empty($annotation->relationProperties) && $value) {
                     if (is_iterable($value)) {
+                        // Convertir l'iterable en tableau
+                        $arrayValue = \is_array($value) ? $value : iterator_to_array($value);
+
                         $data[$annotation->propertyName] = array_map(
                             fn ($relatedEntity): array => $this->getRelationPropertiesValue($relatedEntity, $annotation->relationProperties),
-                            $value->toArray()
+                            $arrayValue
                         );
                     } else {
                         $relationValues = $this->getRelationPropertiesValue($value, $annotation->relationProperties);
@@ -86,8 +96,12 @@ class GenericIndexer implements IndexerInterface
         return $data;
     }
 
-    public function getRelationPropertiesValue($entity, array $propertyNames): array
+    public function getRelationPropertiesValue(mixed $entity, array $propertyNames): array
     {
+        if (!\is_object($entity)) {
+            throw new InvalidArgumentException('The entity must be an object.');
+        }
+
         // Initialiser le proxy si nécessaire
         if ($entity instanceof Proxy) {
             $this->em->initializeObject($entity);
@@ -105,12 +119,19 @@ class GenericIndexer implements IndexerInterface
         return $values;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getIndexName(string $entityClass): string
     {
+        if (!class_exists($entityClass)) {
+            throw new InvalidArgumentException(sprintf('The class %s does not exist.', $entityClass));
+        }
+
         $reflectionClass = new ReflectionClass($entityClass);
         $attributes = $reflectionClass->getAttributes(Map::class);
 
-        if ($attributes === []) {
+        if ([] === $attributes) {
             throw new Exception(sprintf('Entity class %s is not mapped to an index.', $entityClass));
         }
 
@@ -124,7 +145,7 @@ class GenericIndexer implements IndexerInterface
         $indexName = $this->getIndexName($entityClass);
 
         // Mettre à jour les paramètres de l'index sur le client de recherche
-        if ($this->indexSettings !== []) {
+        if ([] !== $this->indexSettings) {
             $this->client->updateSettings($indexName, $this->indexSettings);
         }
 
@@ -134,13 +155,21 @@ class GenericIndexer implements IndexerInterface
 
     private function shouldIndexEntity(object $entity): bool
     {
+        if (!\is_object($entity)) {
+            throw new InvalidArgumentException('The entity must be an object.');
+        }
+
         $reflectionClass = new ReflectionClass($entity);
         $attributes = $reflectionClass->getAttributes(IndexCondition::class);
 
-        if ($attributes !== []) {
+        if ([] !== $attributes) {
             $annotation = $attributes[0]->newInstance();
             $conditionClass = $annotation->conditionClass;
             if ($conditionClass) {
+                if (!class_exists($conditionClass)) {
+                    throw new InvalidArgumentException(sprintf('The condition class %s does not exist.', $conditionClass));
+                }
+
                 $condition = new $conditionClass();
                 if (!$condition instanceof IndexConditionInterface) {
                     throw new Exception(sprintf('Condition class %s must implement IndexConditionInterface.', $conditionClass));

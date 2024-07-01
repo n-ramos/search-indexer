@@ -5,6 +5,7 @@ namespace Nramos\SearchIndexer\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Nramos\SearchIndexer\Annotation\Map;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
+use Nramos\SearchIndexer\Indexer\IndexableEntityInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,9 +18,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class IndexEntitiesCommand extends Command
 {
-    private readonly \Doctrine\ORM\EntityManagerInterface $entityManager;
+    private readonly EntityManagerInterface $entityManager;
 
-    private readonly \Nramos\SearchIndexer\Indexer\GenericIndexer $indexer;
+    private readonly GenericIndexer $indexer;
 
     public function __construct(EntityManagerInterface $entityManager, GenericIndexer $indexer)
     {
@@ -28,7 +29,7 @@ class IndexEntitiesCommand extends Command
         $this->indexer = $indexer;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('Indexes specified entities or all entities if none specified')
@@ -41,6 +42,16 @@ class IndexEntitiesCommand extends Command
         $entityClass = $input->getArgument('entityClass');
 
         if ($entityClass) {
+            if (!\is_string($entityClass) || !is_subclass_of($entityClass, IndexableEntityInterface::class)) {
+                $output->writeln(sprintf(
+                    '<error>The class %s must implement IndexableEntityInterface.</error>',
+                    \is_string($entityClass) ? $entityClass : \gettype($entityClass)
+                ));
+
+                return Command::FAILURE;
+            }
+
+            // @var class-string<IndexableEntityInterface> $entityClass
             $this->indexEntities($entityClass, $output);
         } else {
             $this->indexAllEntities($output);
@@ -49,13 +60,18 @@ class IndexEntitiesCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @param class-string<IndexableEntityInterface> $entityClass
+     */
     private function indexEntities(string $entityClass, OutputInterface $output): void
     {
         $repository = $this->entityManager->getRepository($entityClass);
         $entities = $repository->findAll();
 
         foreach ($entities as $entity) {
-            $this->indexer->index(['entityClass' => $entityClass, 'id' => $entity->getId()]);
+            if ($entity instanceof IndexableEntityInterface) {
+                $this->indexer->index(['entityClass' => $entityClass, 'id' => $entity->getId()]);
+            }
         }
 
         $output->writeln(sprintf('Indexed all entities of class %s.', $entityClass));
@@ -65,7 +81,7 @@ class IndexEntitiesCommand extends Command
     {
         $this->indexer->clean($entityClass);
 
-        $output->writeln(sprintf('Indexed all entities of class %s.', $entityClass));
+        $output->writeln(sprintf('Removed all entities of class %s from index.', $entityClass));
     }
 
     private function indexAllEntities(OutputInterface $output): void
@@ -74,11 +90,18 @@ class IndexEntitiesCommand extends Command
 
         foreach ($metaData as $meta) {
             $reflectionClass = $meta->getReflectionClass();
+
+            if (null === $reflectionClass) {
+                continue; // Skip if reflection class is null
+            }
+
             $attributes = $reflectionClass->getAttributes(Map::class);
 
-            if ($attributes) {
-                $this->removeEntities($meta->getName(), $output);
-                $this->indexEntities($meta->getName(), $output);
+            if ($attributes && $reflectionClass->implementsInterface(IndexableEntityInterface::class)) {
+                /** @var class-string<IndexableEntityInterface> $entityClass */
+                $entityClass = $meta->getName();
+                $this->removeEntities($entityClass, $output);
+                $this->indexEntities($entityClass, $output);
             }
         }
     }
