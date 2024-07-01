@@ -10,6 +10,7 @@ use Nramos\SearchIndexer\Command\IndexEntitiesCommand;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
 use Nramos\SearchIndexer\Indexer\IndexableEntityInterface;
 use Nramos\SearchIndexer\Tests\Entity\House;
+use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use stdClass;
@@ -19,10 +20,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @internal
- *
- * @small
  */
-final class IndexEntitiesCommandTest extends TestCase
+#[Small] final class IndexEntitiesCommandTest extends TestCase
 {
     private $entityManager;
     private $indexer;
