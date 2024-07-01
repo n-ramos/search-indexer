@@ -20,7 +20,6 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @internal
- *
  */
 #[Small] final class IndexEntitiesCommandTest extends TestCase
 {
