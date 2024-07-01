@@ -6,7 +6,7 @@ use Nramos\SearchIndexer\Filter\SearchFilterInterface;
 
 interface SearchClientInterface
 {
-    public function put(string $index, array $data): mixed;
+    public function put(string $index, array $data = []): mixed;
 
     public function delete(string $index, int $id): mixed;
 
