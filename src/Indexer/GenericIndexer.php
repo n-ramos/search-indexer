@@ -103,12 +103,10 @@ class GenericIndexer implements IndexerInterface
             throw new InvalidArgumentException('The entity must be an object.');
         }
 
-        // Initialiser le proxy si nécessaire
-        if ($entity instanceof Proxy) {
-            $this->em->initializeObject($entity);
-        }
-
         $reflectionClass = new ReflectionClass($entity);
+        if ($entity instanceof Proxy) {
+            $reflectionClass = $reflectionClass->getParentClass();
+        }
         $values = [];
         foreach ($propertyNames as $propertyName) {
             $property = $reflectionClass->getProperty($propertyName);

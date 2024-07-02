@@ -2,6 +2,7 @@
 
 namespace Nramos\SearchIndexer\Tests\Indexer;
 
+use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
 use Nramos\SearchIndexer\Indexer\SearchIndexerSubscriber;
@@ -9,6 +10,8 @@ use Nramos\SearchIndexer\Tests\Entity\House;
 use Nramos\SearchIndexer\Tests\Entity\HouseType;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionException;
 
 /**
  * @internal
@@ -82,5 +85,19 @@ use PHPUnit\Framework\TestCase;
 
         // Appeler postPersist sur le subscriber avec les arguments mockés
         $subscriber->postPersist($argsMock);
+    }
+
+    public function testGetSubscribedEvents()
+    {
+        // Créer une instance du subscriber avec un mock pour IndexerInterface
+        $subscriber = new SearchIndexerSubscriber($this->createMock(GenericIndexer::class));
+
+        // Appeler la méthode getSubscribedEvents
+        $events = $subscriber->getSubscribedEvents();
+
+        // Vérifier que les événements postPersist et postUpdate sont dans le tableau retourné
+        self::assertContains(Events::postPersist, $events);
+        self::assertContains(Events::postUpdate, $events);
+        self::assertCount(2, $events); // S'assurer qu'il y a exactement deux événements
     }
 }

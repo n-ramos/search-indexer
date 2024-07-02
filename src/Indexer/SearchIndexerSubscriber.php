@@ -13,8 +13,6 @@ use ReflectionClass;
 
 /**
  * @see SearchIndexerSubscriberTest
- * @see SearchIndexerSubscriberTest
- * @see SearchIndexerSubscriberTest
  */
 #[AsDoctrineListener(event: Events::postPersist, priority: 0, connection: 'default')]
 #[AsDoctrineListener(event: Events::postUpdate, priority: 0, connection: 'default')]
@@ -63,15 +61,11 @@ class SearchIndexerSubscriber
 
         $reflectionClass = new ReflectionClass($entity);
 
-        try {
-            if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
-                $this->indexer->index([
-                    'entityClass' => $entity::class,
-                    'id' => $entity->getId(),
-                ]);
-            }
-        } catch (Exception) {
-            // Do nothing
+        if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
+            $this->indexer->index([
+                'entityClass' => $entity::class,
+                'id' => $entity->getId(),
+            ]);
         }
     }
 }
