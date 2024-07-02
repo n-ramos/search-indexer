@@ -2,6 +2,8 @@
 
 namespace Nramos\SearchIndexer\Tests\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Nramos\SearchIndexer\Annotation\SearchIndex;
 use Nramos\SearchIndexer\Annotation\SearchProperty;
@@ -29,6 +31,15 @@ class House implements IndexableEntityInterface
     #[ORM\JoinColumn(name: 'house_type_id', referencedColumnName: 'id')]
     #[SearchProperty(propertyName: 'type', relationProperties: ['typeName'], filterable: true, sortable: false)]
     private $houseType;
+
+    #[ORM\ManyToMany(targetEntity: Heating::class, mappedBy: 'houses')]
+    #[SearchProperty(propertyName: 'heatings', relationProperties: ['name'], filterable: true)]
+    private Collection $heatings;
+
+    public function __construct()
+    {
+        $this->heatings = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
