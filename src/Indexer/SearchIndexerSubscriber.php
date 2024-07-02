@@ -6,7 +6,6 @@ use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Exception;
 use Nramos\SearchIndexer\Annotation\SearchIndex;
 use Nramos\SearchIndexer\Tests\Indexer\SearchIndexerSubscriberTest;
 use ReflectionClass;

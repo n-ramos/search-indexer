@@ -97,6 +97,9 @@ class GenericIndexer implements IndexerInterface
         return $data;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getRelationPropertiesValue(mixed $entity, array $propertyNames): array
     {
         if (!\is_object($entity)) {
@@ -108,6 +111,9 @@ class GenericIndexer implements IndexerInterface
             $reflectionClass = $reflectionClass->getParentClass();
         }
         $values = [];
+        if (false === $reflectionClass) {
+            return [];
+        }
         foreach ($propertyNames as $propertyName) {
             $property = $reflectionClass->getProperty($propertyName);
 
