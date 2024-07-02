@@ -1,4 +1,4 @@
-name: auditor-bundle 6.x CI
+name: SearchIndexer CI
 
 on:
   schedule:
@@ -108,7 +108,7 @@ jobs:
           directory: reports
           token: ${{ secrets.CODECOV_TOKEN }}
   release:
-    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
