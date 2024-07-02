@@ -16,7 +16,7 @@ jobs:
 
       - name: Gitmoji Auto Release
         id: auto_release
-        uses: n-ramos/gitmoji-auto-release-action@v1.0.0
+        uses: n-ramos/gitmoji-auto-release-action@v1
         with:
           branch: ${{ github.ref }}
           draft: false
