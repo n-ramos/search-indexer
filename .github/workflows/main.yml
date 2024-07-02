@@ -107,19 +107,3 @@ jobs:
         with:
           directory: reports
           token: ${{ secrets.CODECOV_TOKEN }}
-  release:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Gitmoji Auto Release
-        id: auto_release
-        uses: n-ramos/gitmoji-auto-release-action@v1.0.0
-        with:
-          branch: ${{ github.ref }}
-          draft: true
-          prerelease: false
-          github_token: ${{ secrets.GITHUB_TOKEN }}
