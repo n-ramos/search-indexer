@@ -116,12 +116,14 @@ class MeiliSearchFilter implements SearchFilterInterface
 
                 case 'location':
                     if ('radius' === $filter['location_type']) {
+                        if('km' === $filter['unit']) {
+                            $filter['coordinates'][2] *= 1000;
+                        }
                         $filterStrings[] = sprintf(
-                            '_geoRadius(%f, %f, %d%s)',
+                            '_geoRadius(%f, %f, %d)',
                             $filter['coordinates'][0],
                             $filter['coordinates'][1],
-                            $filter['coordinates'][2],
-                            $filter['unit']
+                            $filter['coordinates'][2]
                         );
                     } elseif ('bounding' === $filter['location_type']) {
                         $filterStrings[] = sprintf(
