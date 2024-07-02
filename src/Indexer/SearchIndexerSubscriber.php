@@ -6,14 +6,11 @@ use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Exception;
 use Nramos\SearchIndexer\Annotation\SearchIndex;
 use Nramos\SearchIndexer\Tests\Indexer\SearchIndexerSubscriberTest;
 use ReflectionClass;
 
 /**
- * @see SearchIndexerSubscriberTest
- * @see SearchIndexerSubscriberTest
  * @see SearchIndexerSubscriberTest
  */
 #[AsDoctrineListener(event: Events::postPersist, priority: 0, connection: 'default')]
@@ -63,15 +60,11 @@ class SearchIndexerSubscriber
 
         $reflectionClass = new ReflectionClass($entity);
 
-        try {
-            if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
-                $this->indexer->index([
-                    'entityClass' => $entity::class,
-                    'id' => $entity->getId(),
-                ]);
-            }
-        } catch (Exception) {
-            // Do nothing
+        if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
+            $this->indexer->index([
+                'entityClass' => $entity::class,
+                'id' => $entity->getId(),
+            ]);
         }
     }
 }

@@ -97,19 +97,23 @@ class GenericIndexer implements IndexerInterface
         return $data;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getRelationPropertiesValue(mixed $entity, array $propertyNames): array
     {
         if (!\is_object($entity)) {
             throw new InvalidArgumentException('The entity must be an object.');
         }
 
-        // Initialiser le proxy si nécessaire
-        if ($entity instanceof Proxy) {
-            $this->em->initializeObject($entity);
-        }
-
         $reflectionClass = new ReflectionClass($entity);
+        if ($entity instanceof Proxy) {
+            $reflectionClass = $reflectionClass->getParentClass();
+        }
         $values = [];
+        if (false === $reflectionClass) {
+            return [];
+        }
         foreach ($propertyNames as $propertyName) {
             $property = $reflectionClass->getProperty($propertyName);
 
