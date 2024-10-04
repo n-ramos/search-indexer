@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/n-ramos/search-indexer/branch/main/graph/badge.svg?token=VZOQ2C6STQ)](https://codecov.io/gh/n-ramos/search-indexer)
+
 # nramos/search-indexer
 
 Le package `nramos/search-indexer` permet d'indexer des entités Doctrine sur différents systèmes d'indexation via des annotations. Actuellement, un adaptateur pour Meilisearch est disponible, mais la structure permet d'ajouter d'autres systèmes d'indexation à l'avenir.
