@@ -19,18 +19,24 @@ class GenericIndexer implements IndexerInterface
         private readonly EntityManagerInterface $em,
         private readonly SearchClientInterface $client
     ) {}
-
+    private function processIndex($entityClass, $entityData) {
+        $indexName = $this->getIndexName($entityClass);
+        $indexData = $this->extractData($entityData);
+        $this->client->put($indexName, [$indexData]);
+        $this->updateIndexSettings($entityClass);
+    }
     public function index(array $data): bool
     {
         $entityClass = $data['entityClass'];
+
+        if(is_object($entityClass)) {
+            $this->processIndex($entityClass::class, $entityClass);
+            return true;
+        }
+
         $entity = $this->em->getRepository($entityClass)->find($data['id']);
         if (null !== $entity) {
-            $indexName = $this->getIndexName($entityClass);
-            $indexData = $this->extractData($entity);
-            $this->client->put($indexName, [$indexData]);
-
-            $this->updateIndexSettings($entityClass);
-
+            $this->processIndex($entityClass, $entity);
             return true;
         }
 
