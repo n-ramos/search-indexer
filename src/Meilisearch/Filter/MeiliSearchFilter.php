@@ -35,26 +35,24 @@ class MeiliSearchFilter implements SearchFilterInterface
         return $this;
     }
 
-    public function addLocationFilter(string $type, float $lat, float $lng, int $radius = 5, string $unit = 'm', string $separator = 'AND'): self
+    public function addLocationFilter(string $type, float $lat, float $lng, int $radius = 5, string $separator = 'AND'): self
     {
         $this->filters[] = [
             'type' => 'location',
             'location_type' => $type,
             'coordinates' => [$lat, $lng, $radius],
-            'unit' => $unit,
             'separator' => $separator,
         ];
 
         return $this;
     }
 
-    public function addLocationBounding(string $type, array $coordinates, string $unit = 'm', string $separator = 'AND'): self
+    public function addLocationBounding(string $type, array $coordinates, string $separator = 'AND'): self
     {
         $this->filters[] = [
             'type' => 'location',
             'location_type' => $type,
             'coordinates' => $coordinates,
-            'unit' => $unit,
             'separator' => $separator,
         ];
 

@@ -8,9 +8,9 @@ interface SearchFilterInterface
 
     public function addInFilter(string $field, array $values, string $separator = 'AND'): self;
 
-    public function addLocationFilter(string $type, float $lat, float $lng, int $radius = 5, string $unit = 'km', string $separator = 'AND'): self;
+    public function addLocationFilter(string $type, float $lat, float $lng, int $radius = 5, string $separator = 'AND'): self;
 
-    public function addLocationBounding(string $type, array $coordinates, string $unit = 'm', string $separator = 'AND'): self;
+    public function addLocationBounding(string $type, array $coordinates, string $separator = 'AND'): self;
 
     public function addExistenceFilter(string $field, bool $exists = true, string $separator = 'AND'): self;
 
