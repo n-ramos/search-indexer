@@ -2,7 +2,6 @@
 
 namespace Nramos\SearchIndexer;
 
-
 use Nramos\SearchIndexer\DependencyInjection\Compiler\IndexableCompilerPass;
 use Nramos\SearchIndexer\DependencyInjection\SearchBundleExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -20,6 +19,7 @@ class SearchBundle extends AbstractBundle
     {
         return new SearchBundleExtension();
     }
+
     public function build(ContainerBuilder $container): void
     {
         parent::build($container);

@@ -4,17 +4,17 @@ namespace Nramos\SearchIndexer\DependencyInjection\Compiler;
 
 use Nramos\SearchIndexer\Annotation\SearchIndex;
 use ReflectionClass;
+use ReflectionException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class IndexableCompilerPass implements CompilerPassInterface
 {
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function process(ContainerBuilder $container): void
     {
-
         // Initialisation d'un tableau pour stocker les noms de classes
         $indexedClasses = [];
 
@@ -34,7 +34,5 @@ class IndexableCompilerPass implements CompilerPassInterface
         }
         // Stocke la liste des noms de classes dans un paramètre du conteneur
         $container->setParameter('nramos.search_indexes', $indexedClasses);
-
     }
-
 }

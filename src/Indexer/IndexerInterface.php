@@ -4,5 +4,5 @@ namespace Nramos\SearchIndexer\Indexer;
 
 interface IndexerInterface
 {
-    public function index(array $data): bool;
+    public function index(object $data): void;
 }

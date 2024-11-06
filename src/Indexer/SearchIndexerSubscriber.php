@@ -61,10 +61,7 @@ class SearchIndexerSubscriber
         $reflectionClass = new ReflectionClass($entity);
 
         if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
-            $this->indexer->index([
-                'entityClass' => $entity::class,
-                'id' => $entity->getId(),
-            ]);
+            $this->indexer->index($entity);
         }
     }
 }

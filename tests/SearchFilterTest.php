@@ -52,7 +52,7 @@ use PHPUnit\Framework\TestCase;
             ->addFilter('genres', '=', 'comedy')
             ->closeParenthesis()
             ->addInFilter('role', ['admin', 'user'])
-            ->addLocationFilter('radius', 48.8566, 2.3522, 5 )
+            ->addLocationFilter('radius', 48.8566, 2.3522, 5)
             ->addLocationBounding('bounding', [48.8566, 2.3522, 49.8566, 2.4522])
             ->addExistenceFilter('release_date')
             ->addExistenceFilter('overview', false)

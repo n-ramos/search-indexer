@@ -102,25 +102,26 @@ class MeiliSearchFilter implements SearchFilterInterface
             switch ($filter['type']) {
                 case 'basic':
                     $value = '"'.$filter['value'].'"';
-                    $filterStrings[] = sprintf('%s %s %s', $filter['field'], $filter['operator'], $value);
+                    $filterStrings[] = \sprintf('%s %s %s', $filter['field'], $filter['operator'], $value);
 
                     break;
 
                 case 'in':
                     $values = '['.implode(', ', array_map(static fn ($val): string => '"'.$val.'"', $filter['values'])).']';
-                    $filterStrings[] = sprintf('%s IN %s', $filter['field'], $values);
+                    $filterStrings[] = \sprintf('%s IN %s', $filter['field'], $values);
 
                     break;
 
                 case 'location':
                     if ('radius' === $filter['location_type']) {
-                        $filterStrings[] = sprintf(
+                        $filterStrings[] = \sprintf(
                             '_geoRadius(%f, %f, %d)',
                             $filter['coordinates'][0],
                             $filter['coordinates'][1],
-                            $filter['coordinates'][2]);
+                            $filter['coordinates'][2]
+                        );
                     } elseif ('bounding' === $filter['location_type']) {
-                        $filterStrings[] = sprintf(
+                        $filterStrings[] = \sprintf(
                             '_geoBoundingBox([%f, %f], [%f, %f])',
                             $filter['coordinates'][0],
                             $filter['coordinates'][1],
@@ -133,7 +134,7 @@ class MeiliSearchFilter implements SearchFilterInterface
 
                 case 'existence':
                     $operator = $filter['exists'] ? 'EXISTS' : 'NOT EXISTS';
-                    $filterStrings[] = sprintf('%s %s', $filter['field'], $operator);
+                    $filterStrings[] = \sprintf('%s %s', $filter['field'], $operator);
 
                     break;
 

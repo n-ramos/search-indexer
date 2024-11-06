@@ -19,28 +19,14 @@ class GenericIndexer implements IndexerInterface
         private readonly EntityManagerInterface $em,
         private readonly SearchClientInterface $client
     ) {}
-    private function processIndex($entityClass, $entityData) {
-        $indexName = $this->getIndexName($entityClass);
-        $indexData = $this->extractData($entityData);
-        $this->client->put($indexName, [$indexData]);
-        $this->updateIndexSettings($entityClass);
-    }
-    public function index(array $data): bool
+
+    public function index(object $data): void
     {
-        $entityClass = $data['entityClass'];
-
-        if(is_object($entityClass)) {
-            $this->processIndex($entityClass::class, $entityClass);
-            return true;
-        }
-
-        $entity = $this->em->getRepository($entityClass)->find($data['id']);
-        if (null !== $entity) {
-            $this->processIndex($entityClass, $entity);
-            return true;
-        }
-
-        return false;
+        $className = $data::class;
+        $indexName = $this->getIndexName($className);
+        $indexData = $this->extractData($data);
+        $this->client->put($indexName, [$indexData]);
+        $this->updateIndexSettings($className);
     }
 
     public function remove(int $id, string $entityClass): void
@@ -136,14 +122,14 @@ class GenericIndexer implements IndexerInterface
     public function getIndexName(string $entityClass): string
     {
         if (!class_exists($entityClass)) {
-            throw new InvalidArgumentException(sprintf('The class %s does not exist.', $entityClass));
+            throw new InvalidArgumentException(\sprintf('The class %s does not exist.', $entityClass));
         }
 
         $reflectionClass = new ReflectionClass($entityClass);
         $attributes = $reflectionClass->getAttributes(SearchIndex::class);
 
         if ([] === $attributes) {
-            throw new Exception(sprintf('Entity class %s is not mapped to an index.', $entityClass));
+            throw new Exception(\sprintf('Entity class %s is not mapped to an index.', $entityClass));
         }
 
         $annotation = $attributes[0]->newInstance();
