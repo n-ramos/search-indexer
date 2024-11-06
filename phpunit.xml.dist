@@ -9,13 +9,12 @@
   <php>
     <ini name="error_reporting" value="-1"/>
     <env name="DATABASE_URL" value="sqlite:///:memory:"/>
-    <server name="KERNEL_CLASS" value="Nramos\SearchIndexer\Tests\TestKernel" />
     <server name="APP_ENV" value="test" force="true"/>
     <server name="SHELL_VERBOSITY" value="-1"/>
     <server name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
   </php>
   <testsuites>
-    <testsuite name="AuditBundle test suite">
+    <testsuite name="SearchIndexTest suite">
       <directory suffix="Test.php">tests</directory>
     </testsuite>
   </testsuites>

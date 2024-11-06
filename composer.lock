@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ad43d98f2cd78310792ec438dd0dff44",
+    "content-hash": "3507df0b7c8a3d0380e50a6128ea40ce",
     "packages": [
         {
             "name": "doctrine/cache",
@@ -791,16 +791,16 @@
         },
         {
             "name": "doctrine/orm",
-            "version": "3.2.1",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/orm.git",
-                "reference": "722cea6536775206e81744542b36fa7c9a4ea3e5"
+                "reference": "69958152e661aa9c14e80d1ee4962863485aa60b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/722cea6536775206e81744542b36fa7c9a4ea3e5",
-                "reference": "722cea6536775206e81744542b36fa7c9a4ea3e5",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/69958152e661aa9c14e80d1ee4962863485aa60b",
+                "reference": "69958152e661aa9c14e80d1ee4962863485aa60b",
                 "shasum": ""
             },
             "require": {
@@ -822,7 +822,10 @@
             "require-dev": {
                 "doctrine/coding-standard": "^12.0",
                 "phpbench/phpbench": "^1.0",
-                "phpstan/phpstan": "1.11.1",
+                "phpdocumentor/guides-cli": "^1.4",
+                "phpstan/extension-installer": "^1.4",
+                "phpstan/phpstan": "1.12.6",
+                "phpstan/phpstan-deprecation-rules": "^1.2",
                 "phpunit/phpunit": "^10.4.0",
                 "psr/log": "^1 || ^2 || ^3",
                 "squizlabs/php_codesniffer": "3.7.2",
@@ -873,9 +876,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/orm/issues",
-                "source": "https://github.com/doctrine/orm/tree/3.2.1"
+                "source": "https://github.com/doctrine/orm/tree/3.3.0"
             },
-            "time": "2024-06-26T21:48:58+00:00"
+            "time": "2024-10-12T20:07:18+00:00"
         },
         {
             "name": "doctrine/persistence",
@@ -3658,6 +3661,126 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "matthiasnoback/symfony-config-test",
+            "version": "v5.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SymfonyTest/SymfonyConfigTest.git",
+                "reference": "40864143f0a223112605040d6cf867ef86fa5651"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SymfonyTest/SymfonyConfigTest/zipball/40864143f0a223112605040d6cf867ef86fa5651",
+                "reference": "40864143f0a223112605040d6cf867ef86fa5651",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "phpunit/phpunit": "^9.6 || ^10.0 || ^11.0",
+                "symfony/config": "^5.4 || ^6.2 || ^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Matthias\\SymfonyConfigTest\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Matthias Noback",
+                    "email": "matthiasnoback@gmail.com",
+                    "homepage": "http://php-and-symfony.matthiasnoback.nl"
+                }
+            ],
+            "description": "Library for testing user classes related to the Symfony Config Component",
+            "homepage": "https://github.com/matthiasnoback/SymfonyConfigTest",
+            "keywords": [
+                "config",
+                "phpunit",
+                "symfony",
+                "testing"
+            ],
+            "support": {
+                "issues": "https://github.com/SymfonyTest/SymfonyConfigTest/issues",
+                "source": "https://github.com/SymfonyTest/SymfonyConfigTest/tree/v5.2.0"
+            },
+            "time": "2024-06-23T19:12:42+00:00"
+        },
+        {
+            "name": "matthiasnoback/symfony-dependency-injection-test",
+            "version": "6.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SymfonyTest/SymfonyDependencyInjectionTest.git",
+                "reference": "487b7fd71e158de74573f9dd6e51b5e24eb32f1f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SymfonyTest/SymfonyDependencyInjectionTest/zipball/487b7fd71e158de74573f9dd6e51b5e24eb32f1f",
+                "reference": "487b7fd71e158de74573f9dd6e51b5e24eb32f1f",
+                "shasum": ""
+            },
+            "require": {
+                "matthiasnoback/symfony-config-test": "^5.0",
+                "php": "^8.1",
+                "phpunit/phpunit": "^10.5.11 || ^11.0",
+                "sebastian/exporter": " ^5.0 || ^6.0",
+                "symfony/config": "^5.4 || ^6.2 || ^7.0",
+                "symfony/dependency-injection": "^5.4 || ^6.2 || ^7.0",
+                "symfony/yaml": "^5.4 || ^6.2 || ^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Matthias\\SymfonyDependencyInjectionTest\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Matthias Noback",
+                    "email": "matthiasnoback@gmail.com",
+                    "homepage": "http://php-and-symfony.matthiasnoback.nl"
+                }
+            ],
+            "description": "Library for testing user classes related to the Symfony Dependency Injection Component",
+            "homepage": "https://github.com/matthiasnoback/SymfonyDependencyInjectionTest",
+            "keywords": [
+                "Symfony2",
+                "dependency injection",
+                "dev",
+                "phpunit"
+            ],
+            "support": {
+                "issues": "https://github.com/SymfonyTest/SymfonyDependencyInjectionTest/issues",
+                "source": "https://github.com/SymfonyTest/SymfonyDependencyInjectionTest/tree/6.0.0"
+            },
+            "time": "2024-04-26T08:38:14+00:00"
+        },
         {
             "name": "myclabs/deep-copy",
             "version": "1.12.0",

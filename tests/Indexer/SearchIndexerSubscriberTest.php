@@ -3,11 +3,11 @@
 namespace Nramos\SearchIndexer\Tests\Indexer;
 
 use Doctrine\ORM\Events;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
 use Nramos\SearchIndexer\Indexer\SearchIndexerSubscriber;
 use Nramos\SearchIndexer\Tests\Entity\House;
 use Nramos\SearchIndexer\Tests\Entity\HouseType;
+use Nramos\SearchIndexer\Tests\Traits\EntityManagerInterfaceTrait;
 use PHPUnit\Framework\Attributes\Small;
 use PHPUnit\Framework\TestCase;
 
@@ -16,86 +16,81 @@ use PHPUnit\Framework\TestCase;
  */
 #[Small] final class SearchIndexerSubscriberTest extends TestCase
 {
+    use EntityManagerInterfaceTrait;
+
     public function testPostPersist()
     {
+        $em = $this->createEntityManager();
+        $evm = $em->getEventManager();
+
         $house = new House();
+        $house->setName('Persisted House');
+        $house->setPrice(1_500);
         $house->setId(1);
-        // Créer un mock pour IndexerInterface
         $indexerMock = $this->createMock(GenericIndexer::class);
+
         $indexerMock->expects(self::once())
             ->method('index')
-            ->with([
-                'entityClass' => 'Nramos\SearchIndexer\Tests\Entity\House',
-                'id' => 1,
-            ])
-        ;
-
-        // Créer un mock pour LifecycleEventArgs
-        $argsMock = $this->createMock(LifecycleEventArgs::class);
-        $argsMock->expects(self::once())
-            ->method('getObject')
-            ->willReturn($house) // Mock your entity with ID 1
+            ->with($house)
         ;
 
         $subscriber = new SearchIndexerSubscriber($indexerMock);
-        $subscriber->postPersist($argsMock);
+        $evm->addEventListener(Events::postPersist, $subscriber);
+
+        $em->persist($house);
+        $em->flush();
     }
 
     public function testPostUpdate()
     {
+        $em = $this->createEntityManager();
+        $evm = $em->getEventManager();
+
         $house = new House();
-        $house->setId(1);
-        // Créer un mock pour IndexerInterface
+        $house->setName('Updated House');
+        $house->setPrice(2_000);
+        $em->persist($house);
+        $em->flush();
+
+        $house->setPrice(2_500);
+
         $indexerMock = $this->createMock(GenericIndexer::class);
         $indexerMock->expects(self::once())
             ->method('index')
-            ->with([
-                'entityClass' => 'Nramos\SearchIndexer\Tests\Entity\House',
-                'id' => 1,
-            ])
-        ;
-
-        // Créer un mock pour LifecycleEventArgs
-        $argsMock = $this->createMock(LifecycleEventArgs::class);
-        $argsMock->expects(self::once())
-            ->method('getObject')
-            ->willReturn($house) // Mock your entity with ID 1
+            ->with($house)
         ;
 
         $subscriber = new SearchIndexerSubscriber($indexerMock);
-        $subscriber->postUpdate($argsMock);
+        $evm->addEventListener(Events::postUpdate, $subscriber);
+
+        $em->flush();
     }
 
     public function testHouseTypeNotIndexed()
     {
-        // Mock IndexerInterface
+        $em = $this->createEntityManager();
+        $evm = $em->getEventManager();
+
         $indexerMock = $this->createMock(GenericIndexer::class);
-        $indexerMock->expects(self::never())->method('index'); // On s'attend à ce que la méthode index ne soit jamais appelée
+        $indexerMock->expects(self::never())->method('index');
 
-        // Créer un mock pour LifecycleEventArgs avec une entité HouseType non annotée
-        $houseTypeMock = new HouseType();
-        $houseTypeMock->setId(1);
-        $argsMock = $this->createMock(LifecycleEventArgs::class);
-        $argsMock->expects(self::once())->method('getObject')->willReturn($houseTypeMock);
-
-        // Créer le subscriber avec le mock de l'indexer
         $subscriber = new SearchIndexerSubscriber($indexerMock);
+        $evm->addEventListener(Events::postPersist, $subscriber);
 
-        // Appeler postPersist sur le subscriber avec les arguments mockés
-        $subscriber->postPersist($argsMock);
+        $houseType = new HouseType();  // Entity not marked for indexing
+        $houseType->setTypeName('Non-indexed Type');
+        $em->persist($houseType);
+        $em->flush();
     }
 
     public function testGetSubscribedEvents()
     {
-        // Créer une instance du subscriber avec un mock pour IndexerInterface
         $subscriber = new SearchIndexerSubscriber($this->createMock(GenericIndexer::class));
 
-        // Appeler la méthode getSubscribedEvents
         $events = $subscriber->getSubscribedEvents();
 
-        // Vérifier que les événements postPersist et postUpdate sont dans le tableau retourné
         self::assertContains(Events::postPersist, $events);
         self::assertContains(Events::postUpdate, $events);
-        self::assertCount(2, $events); // S'assurer qu'il y a exactement deux événements
+        self::assertCount(2, $events);
     }
 }

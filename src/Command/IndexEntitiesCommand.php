@@ -3,7 +3,6 @@
 namespace Nramos\SearchIndexer\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Nramos\SearchIndexer\Annotation\SearchIndex;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
 use Nramos\SearchIndexer\Indexer\IndexableEntityInterface;
 use Nramos\SearchIndexer\Tests\Command\IndexEntitiesCommandTest;
@@ -47,7 +46,7 @@ class IndexEntitiesCommand extends Command
 
         if ($entityClass) {
             if (!\is_string($entityClass) || !is_subclass_of($entityClass, IndexableEntityInterface::class)) {
-                $output->writeln(sprintf(
+                $output->writeln(\sprintf(
                     '<error>The class %s must implement IndexableEntityInterface.</error>',
                     \is_string($entityClass) ? $entityClass : \gettype($entityClass)
                 ));
@@ -74,23 +73,23 @@ class IndexEntitiesCommand extends Command
 
         foreach ($entities as $entity) {
             if ($entity instanceof IndexableEntityInterface) {
-                $this->indexer->index(['entityClass' => $entityClass, 'id' => $entity->getId()]);
+                $this->indexer->index($entity);
             }
         }
 
-        $output->writeln(sprintf('Indexed all entities of class %s.', $entityClass));
+        $output->writeln(\sprintf('Indexed all entities of class %s.', $entityClass));
     }
 
     private function removeEntities(string $entityClass, OutputInterface $output): void
     {
         $this->indexer->clean($entityClass);
 
-        $output->writeln(sprintf('Removed all entities of class %s from index.', $entityClass));
+        $output->writeln(\sprintf('Removed all entities of class %s from index.', $entityClass));
     }
 
     private function indexAllEntities(OutputInterface $output): void
     {
-        foreach($this->indexedClasses as $entityClass) {
+        foreach ($this->indexedClasses as $entityClass) {
             $this->removeEntities($entityClass, $output);
             $this->indexEntities($entityClass, $output);
         }

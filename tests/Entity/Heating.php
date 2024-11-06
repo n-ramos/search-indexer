@@ -1,11 +1,12 @@
 <?php
+
 namespace Nramos\SearchIndexer\Tests\Entity;
 
-use App\Domain\Bien\Entity\Bien;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Nramos\SearchIndexer\Annotation\SearchProperty;
+
 #[ORM\Entity]
 #[ORM\Table(name: 'heatings')]
 class Heating
@@ -18,7 +19,6 @@ class Heating
     #[SearchProperty(propertyName: 'name', filterable: true, sortable: false)]
     private ?string $name = null;
 
-
     #[ORM\ManyToMany(targetEntity: House::class, mappedBy: 'heatings')]
     private Collection $houses;
 
@@ -26,18 +26,13 @@ class Heating
     {
         $this->houses = new ArrayCollection();
     }
-    /**
-     * @return mixed
-     */
-    public function getId()
+
+    public function getId(): mixed
     {
         return $this->id;
     }
 
-    /**
-     * @param mixed $id
-     */
-    public function setId($id): void
+    public function setId(mixed $id): void
     {
         $this->id = $id;
     }
@@ -61,7 +56,4 @@ class Heating
     {
         $this->houses = $houses;
     }
-
-
-
 }

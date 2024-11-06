@@ -96,7 +96,7 @@ class MeilisearchClient implements SearchClientInterface
             $headers['Authorization'] = 'Bearer '.$this->apiKey;
         }
 
-        $response = $this->client->request($method, sprintf('http://%s/%s', $this->host, $endpoint), [
+        $response = $this->client->request($method, \sprintf('http://%s/%s', $this->host, $endpoint), [
             'json' => $data,
             'headers' => $headers,
         ]);
