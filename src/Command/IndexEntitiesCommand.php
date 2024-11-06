@@ -26,7 +26,7 @@ class IndexEntitiesCommand extends Command
 
     private readonly GenericIndexer $indexer;
 
-    public function __construct(EntityManagerInterface $entityManager, GenericIndexer $indexer)
+    public function __construct(EntityManagerInterface $entityManager, GenericIndexer $indexer, private readonly array $indexedClasses = [])
     {
         parent::__construct();
         $this->entityManager = $entityManager;
@@ -90,23 +90,9 @@ class IndexEntitiesCommand extends Command
 
     private function indexAllEntities(OutputInterface $output): void
     {
-        $metaData = $this->entityManager->getMetadataFactory()->getAllMetadata();
-
-        foreach ($metaData as $meta) {
-            $reflectionClass = $meta->getReflectionClass();
-
-            if (null === $reflectionClass) {
-                continue; // Skip if reflection class is null
-            }
-
-            $attributes = $reflectionClass->getAttributes(SearchIndex::class);
-
-            if ($attributes && $reflectionClass->implementsInterface(IndexableEntityInterface::class)) {
-                /** @var class-string<IndexableEntityInterface> $entityClass */
-                $entityClass = $meta->getName();
-                $this->removeEntities($entityClass, $output);
-                $this->indexEntities($entityClass, $output);
-            }
+        foreach($this->indexedClasses as $entityClass) {
+            $this->removeEntities($entityClass, $output);
+            $this->indexEntities($entityClass, $output);
         }
     }
 }

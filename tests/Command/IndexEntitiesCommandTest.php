@@ -26,14 +26,16 @@ use Symfony\Component\Console\Tester\CommandTester;
     private $entityManager;
     private $indexer;
     private $commandTester;
+    private $indexedClasses;
 
     protected function setUp(): void
     {
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
         $this->indexer = $this->createMock(GenericIndexer::class);
+        $this->indexedClasses = [House::class];
 
         $application = new Application();
-        $command = new IndexEntitiesCommand($this->entityManager, $this->indexer);
+        $command = new IndexEntitiesCommand($this->entityManager, $this->indexer, $this->indexedClasses);
         $application->add($command);
 
         $this->commandTester = new CommandTester($application->find('search:import'));
