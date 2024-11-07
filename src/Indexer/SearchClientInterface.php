@@ -17,4 +17,6 @@ interface SearchClientInterface
     public function createIndex(string $indexName): void;
 
     public function updateSettings(string $indexName, array $indexSettings): void;
+
+    public function multiSearch(array $queries): mixed;
 }

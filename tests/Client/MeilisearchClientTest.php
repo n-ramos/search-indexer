@@ -28,6 +28,46 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
         $this->meilisearchClient = new MeilisearchClient($this->host, $this->apiKey, $this->httpClient);
     }
 
+    public function testMultiSearch()
+    {
+        // Définition des requêtes de recherche multi-index
+        $queries = [
+            [
+                'indexUid' => 'index1',
+                'query' => 'test query 1',
+            ],
+            [
+                'indexUid' => 'index2',
+                'query' => 'test query 2',
+            ],
+        ];
+
+        // Contenu simulé pour la réponse multi-search
+        $responseContent = [
+            'results' => [
+                [
+                    'indexUid' => 'index1',
+                    'hits' => [
+                        ['id' => 1, 'title' => 'Test Result 1'],
+                    ],
+                ],
+                [
+                    'indexUid' => 'index2',
+                    'hits' => [
+                        ['id' => 2, 'title' => 'Test Result 2'],
+                    ],
+                ],
+            ],
+        ];
+
+        // Appel de mockHttpClient pour simuler la requête et la réponse HTTP
+        $this->mockHttpClient('POST', 'multi-search', ['queries' => $queries], 200, $responseContent);
+
+        // Exécute multiSearch et vérifie que la réponse correspond à celle attendue
+        $response = $this->meilisearchClient->multiSearch($queries);
+        self::assertSame($responseContent, $response);
+    }
+
     public function testGet()
     {
         $this->mockHttpClient('GET', 'test_endpoint', [], 200, ['response' => 'data']);
