@@ -101,8 +101,8 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
     public function testDelete()
     {
-        $this->mockHttpClient('DELETE', 'test_index', ['id'], 200, ['response' => 'data']);
-        $response = $this->meilisearchClient->delete('test_index', 1);
+        $this->mockHttpClient('DELETE', 'indexes/test_index', [], 200, ['response' => 'data']);
+        $response = $this->meilisearchClient->delete('test_index');
         self::assertSame(['response' => 'data'], $response);
     }
 

@@ -29,10 +29,10 @@ class GenericIndexer implements IndexerInterface
         $this->updateIndexSettings($className);
     }
 
-    public function remove(int $id, string $entityClass): void
+    public function remove(IndexableEntityInterface $entityClass): void
     {
-        $indexName = $this->getIndexName($entityClass);
-        $this->client->delete($indexName, $id);
+        $indexName = $this->getIndexName($entityClass::class);
+        $this->client->delete($indexName);
     }
 
     public function clean(string $entityClass): void

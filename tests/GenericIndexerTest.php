@@ -48,11 +48,11 @@ use PHPUnit\Framework\TestCase;
         // Configuration du client de recherche pour vérifier les appels
         $this->searchClient->expects(self::once())
             ->method('delete')
-            ->with(self::equalTo('houses'), self::equalTo(1))
+            ->with(self::equalTo('houses'))
         ;
 
         // Appel de la méthode à tester
-        $this->indexer->remove(1, House::class);
+        $this->indexer->remove($house);
 
         // Assertions supplémentaires si nécessaire
         // Ex: Vérification que la suppression a été effectuée correctement

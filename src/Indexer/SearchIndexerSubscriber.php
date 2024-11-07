@@ -15,6 +15,7 @@ use ReflectionClass;
  */
 #[AsDoctrineListener(event: Events::postPersist, priority: 0, connection: 'default')]
 #[AsDoctrineListener(event: Events::postUpdate, priority: 0, connection: 'default')]
+#[AsDoctrineListener(event: Events::preRemove, priority: 0, connection: 'default')]
 class SearchIndexerSubscriber
 {
     private readonly IndexerInterface $indexer;
@@ -29,6 +30,7 @@ class SearchIndexerSubscriber
         return [
             Events::postPersist,
             Events::postUpdate,
+            Events::preRemove,
         ];
     }
 
@@ -38,6 +40,23 @@ class SearchIndexerSubscriber
     public function postPersist(LifecycleEventArgs $args): void
     {
         $this->indexEntity($args);
+    }
+
+    /**
+     * @param LifecycleEventArgs<EntityManagerInterface> $args
+     */
+    public function preRemove(LifecycleEventArgs $args): void
+    {
+        $entity = $args->getObject();
+        if (!$entity instanceof IndexableEntityInterface) {
+            return;
+        }
+
+        $reflectionClass = new ReflectionClass($entity);
+
+        if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
+            $this->indexer->remove($entity);
+        }
     }
 
     /**

@@ -32,7 +32,7 @@ class House implements IndexableEntityInterface
     #[SearchProperty(propertyName: 'type', relationProperties: ['typeName'], filterable: true, sortable: false)]
     private $houseType;
 
-    #[ORM\ManyToMany(targetEntity: Heating::class, mappedBy: 'houses')]
+    #[ORM\ManyToMany(targetEntity: Heating::class, inversedBy: 'houses')]
     #[SearchProperty(propertyName: 'heatings', relationProperties: ['name'], filterable: true)]
     private Collection $heatings;
 
