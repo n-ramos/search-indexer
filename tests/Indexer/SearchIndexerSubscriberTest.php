@@ -41,6 +41,31 @@ use PHPUnit\Framework\TestCase;
         $em->flush();
     }
 
+    public function testPreRemove()
+    {
+        $em = $this->createEntityManager();
+        $evm = $em->getEventManager();
+
+        $house = new House();
+        $house->setName('Removed House');
+        $house->setPrice(2_000);
+        $house->setId(1);
+        $em->persist($house);
+        $em->flush();
+
+        $indexerMock = $this->createMock(GenericIndexer::class);
+        $indexerMock->expects(self::once())
+            ->method('remove')
+            ->with($house)
+        ;
+
+        $subscriber = new SearchIndexerSubscriber($indexerMock);
+        $evm->addEventListener(Events::preRemove, $subscriber);
+
+        $em->remove($house);
+        $em->flush();
+    }
+
     public function testPostUpdate()
     {
         $em = $this->createEntityManager();
@@ -91,6 +116,7 @@ use PHPUnit\Framework\TestCase;
 
         self::assertContains(Events::postPersist, $events);
         self::assertContains(Events::postUpdate, $events);
-        self::assertCount(2, $events);
+        self::assertContains(Events::preRemove, $events);
+        self::assertCount(3, $events);
     }
 }

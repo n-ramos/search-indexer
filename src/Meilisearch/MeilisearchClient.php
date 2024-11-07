@@ -36,9 +36,9 @@ class MeilisearchClient implements SearchClientInterface
         return $this->api($endpoint, $data, 'PATCH');
     }
 
-    public function delete(string $index, int $id): mixed
+    public function delete(string $index): mixed
     {
-        return $this->api($index, ['id'], 'DELETE');
+        return $this->api('indexes/'.$index, [], 'DELETE');
     }
 
     public function clear(string $index): mixed

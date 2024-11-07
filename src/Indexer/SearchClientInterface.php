@@ -8,7 +8,7 @@ interface SearchClientInterface
 {
     public function put(string $index, array $data = []): mixed;
 
-    public function delete(string $index, int $id): mixed;
+    public function delete(string $index): mixed;
 
     public function clear(string $index): mixed;
 
