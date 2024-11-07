@@ -82,6 +82,15 @@ class MeilisearchClient implements SearchClientInterface
         ], 'PATCH');
     }
 
+    public function multiSearch(array $queries): mixed
+    {
+        // Meilisearch multi-search requiert l'envoi des requêtes dans un tableau 'queries'
+        $dataToSend = ['queries' => $queries];
+
+        // Appel au point d'accès multi-search de Meilisearch
+        return $this->api('multi-search', $dataToSend);
+    }
+
     /**
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
