@@ -54,41 +54,51 @@ class GenericIndexer implements IndexerInterface
         $data = [];
 
         foreach ($reflectionClass->getProperties() as $property) {
-            $attributes = $property->getAttributes(SearchProperty::class);
-            if ($attributes) {
-                $property->setAccessible(true);
-                $annotation = $attributes[0]->newInstance();
-                $value = $property->getValue($entity);
-
-                // Désinitialisation du proxy si nécessaire
-                if ($value instanceof Proxy) {
-                    $this->em->initializeObject($value);
-                }
-
-                if (!empty($annotation->relationProperties) && $value) {
-                    if (is_iterable($value)) {
-                        // Convertir l'iterable en tableau
-                        $arrayValue = \is_array($value) ? $value : iterator_to_array($value);
-
-                        $data[$annotation->propertyName] = array_map(
-                            fn ($relatedEntity): array => $this->getRelationPropertiesValue($relatedEntity, $annotation->relationProperties),
-                            $arrayValue
-                        );
-                    } else {
-                        $relationValues = $this->getRelationPropertiesValue($value, $annotation->relationProperties);
-                        $data[$annotation->propertyName] = 1 === \count($relationValues) ? reset($relationValues) : $relationValues;
-                    }
-                } else {
-                    $data[$annotation->propertyName] = $value;
-                }
-
-                $this->addIndexSettings($annotation, $annotation->propertyName);
-            }
+            $this->handlePropertie($property, $entity, $data);
+        }
+        foreach ($reflectionClass->getMethods() as $property) {
+            $this->handlePropertie($property, $entity, $data);
         }
 
         return $data;
     }
 
+    private function handlePropertie(\ReflectionProperty|\ReflectionMethod $property, $entity, &$data) {
+        $attributes = $property->getAttributes(SearchProperty::class);
+
+        if ($attributes) {
+            $property->setAccessible(true);
+            $annotation = $attributes[0]->newInstance();
+            if($property instanceof \ReflectionMethod) {
+                $value = $property->invoke($entity);
+            } else {
+                $value = $property->getValue($entity);
+            }
+
+            // Désinitialisation du proxy si nécessaire
+            if ($value instanceof Proxy) {
+                $this->em->initializeObject($value);
+            }
+
+            if (!empty($annotation->relationProperties) && $value) {
+                if (is_iterable($value)) {
+                    // Convertir l'iterable en tableau
+                    $arrayValue = \is_array($value) ? $value : iterator_to_array($value);
+
+                    $data[$annotation->propertyName] = array_map(
+                        fn ($relatedEntity): array => $this->getRelationPropertiesValue($relatedEntity, $annotation->relationProperties),
+                        $arrayValue
+                    );
+                } else {
+                    $relationValues = $this->getRelationPropertiesValue($value, $annotation->relationProperties);
+                    $data[$annotation->propertyName] = 1 === \count($relationValues) ? reset($relationValues) : $relationValues;
+                }
+            } else {
+                $data[$annotation->propertyName] = $value;
+            }
+            $this->addIndexSettings($annotation, $annotation->propertyName);
+        }
+    }
     /**
      * @throws ReflectionException
      */

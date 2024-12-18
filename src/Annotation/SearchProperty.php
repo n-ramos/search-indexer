@@ -4,7 +4,7 @@ namespace Nramos\SearchIndexer\Annotation;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_PROPERTY)]
+#[Attribute(Attribute::TARGET_PROPERTY|Attribute::TARGET_METHOD)]
 class SearchProperty
 {
     public function __construct(
