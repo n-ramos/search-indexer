@@ -10,10 +10,6 @@ services:
     resource: '../src/**/*'
     exclude: '../src/{Entity,Migrations,Tests,Kernel.php,*.yaml}'
 
-  Nramos\SearchIndexer\Command\IndexEntitiesCommand:
-    arguments:
-      $indexedClasses: '%nramos.search_indexes%'
-
   Nramos\SearchIndexer\Indexer\IndexableObjects:
     arguments:
       $indexedClasses: '%nramos.search_indexes%'

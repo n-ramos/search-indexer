@@ -5,6 +5,7 @@ namespace Nramos\SearchIndexer\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
 use Nramos\SearchIndexer\Indexer\IndexableEntityInterface;
+use Nramos\SearchIndexer\Indexer\IndexableObjects;
 use Nramos\SearchIndexer\Tests\Command\IndexEntitiesCommandTest;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -25,7 +26,7 @@ class IndexEntitiesCommand extends Command
 
     private readonly GenericIndexer $indexer;
 
-    public function __construct(EntityManagerInterface $entityManager, GenericIndexer $indexer, private readonly array $indexedClasses = [])
+    public function __construct(EntityManagerInterface $entityManager, GenericIndexer $indexer, private readonly IndexableObjects $indexableObjects)
     {
         parent::__construct();
         $this->entityManager = $entityManager;
@@ -89,7 +90,8 @@ class IndexEntitiesCommand extends Command
 
     private function indexAllEntities(OutputInterface $output): void
     {
-        foreach ($this->indexedClasses as $entityClass) {
+        $indexedClasses = $this->indexableObjects->getIndexedClasses();
+        foreach ($indexedClasses as $entityClass) {
             $this->removeEntities($entityClass, $output);
             $this->indexEntities($entityClass, $output);
         }
