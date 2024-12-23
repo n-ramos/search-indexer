@@ -80,6 +80,12 @@ class MeilisearchClient implements SearchClientInterface
             'sortableAttributes' => $sortableAttributes,
             'filterableAttributes' => $filterablesAttributes,
         ], 'PATCH');
+
+        if(isset($indexSettings['primaryKey'])) {
+            $this->api('indexes/'.$indexName, [
+                'primaryKey' => $indexSettings['primaryKey'],
+            ], 'PATCH');
+        }
     }
 
     public function multiSearch(array $queries): mixed
