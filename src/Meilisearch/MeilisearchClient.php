@@ -98,7 +98,7 @@ class MeilisearchClient implements SearchClientInterface
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      */
-    private function api(string $endpoint, array $data = [], string $method = 'POST'): mixed
+    public function api(string $endpoint, array $data = [], string $method = 'POST'): mixed
     {
         $headers = [];
         if ('' !== $this->apiKey && '0' !== $this->apiKey) {

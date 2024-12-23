@@ -10,6 +10,7 @@ class SearchProperty
     public function __construct(
         public string $propertyName,
         public array $relationProperties = [],
+        public bool $isPk = false,
         public bool $filterable = false,
         public bool $sortable = false,
         public bool $searchable = true

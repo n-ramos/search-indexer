@@ -153,6 +153,9 @@ class GenericIndexer implements IndexerInterface
 
         // Mettre à jour les paramètres de l'index sur le client de recherche
         if ([] !== $this->indexSettings) {
+            if(!isset($this->indexSettings['primaryKey'])) {
+                throw new Exception('Primary key is required');
+            }
             $this->client->updateSettings($indexName, $this->indexSettings);
         }
 
@@ -172,6 +175,9 @@ class GenericIndexer implements IndexerInterface
 
         if ($annotation->searchable) {
             $this->indexSettings['searchable'][] = $propertyName;
+        }
+        if($annotation->isPk) {
+            $this->indexSettings['primaryKey'] = $propertyName;
         }
     }
 }
