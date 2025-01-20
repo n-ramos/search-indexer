@@ -88,10 +88,16 @@ class MeilisearchClient implements SearchClientInterface
         }
     }
 
-    public function multiSearch(array $queries): mixed
+    public function multiSearch(array $queries, int $limit = 100, int $offset = 0): mixed
     {
         // Meilisearch multi-search requiert l'envoi des requêtes dans un tableau 'queries'
-        $dataToSend = ['queries' => $queries];
+        $dataToSend = [
+            'federation' => [
+                'offset' => $offset,
+                'limit' => $limit,
+            ],
+            'queries' => $queries
+        ];
 
         // Appel au point d'accès multi-search de Meilisearch
         return $this->api('multi-search', $dataToSend);
