@@ -9,9 +9,8 @@ class IndexableEntityAttributesLoader
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager
-    )
-    {
-    }
+    ) {}
+
     public function load(): array
     {
         $indexedClasses = [];
