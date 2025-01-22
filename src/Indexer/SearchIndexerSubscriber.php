@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Nramos\SearchIndexer\Annotation\SearchIndex;
-use Nramos\SearchIndexer\Tests\Indexer\SearchIndexerSubscriberTest;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 
 /**
@@ -18,11 +18,11 @@ use ReflectionClass;
 #[AsDoctrineListener(event: Events::preRemove, priority: 0, connection: 'default')]
 class SearchIndexerSubscriber
 {
-    private readonly IndexerInterface $indexer;
-
-    public function __construct(IndexerInterface $indexer)
+    public function __construct(
+        private readonly IndexerInterface $indexer,
+        private readonly LoggerInterface $logger
+    )
     {
-        $this->indexer = $indexer;
     }
 
     public function getSubscribedEvents(): array
@@ -39,7 +39,12 @@ class SearchIndexerSubscriber
      */
     public function postPersist(LifecycleEventArgs $args): void
     {
-        $this->indexEntity($args);
+        try {
+            $this->indexEntity($args);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
+
     }
 
     /**
@@ -55,7 +60,12 @@ class SearchIndexerSubscriber
         $reflectionClass = new ReflectionClass($entity);
 
         if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
-            $this->indexer->remove($entity);
+            try {
+                $this->indexer->remove($entity);
+            } catch (\Exception $e) {
+                $this->logger->error($e->getMessage());
+            }
+
         }
     }
 
@@ -64,7 +74,12 @@ class SearchIndexerSubscriber
      */
     public function postUpdate(LifecycleEventArgs $args): void
     {
-        $this->indexEntity($args);
+        try {
+            $this->indexEntity($args);
+        } catch (\Exception $e) {
+            $this->logger->error($e->getMessage());
+        }
+
     }
 
     /**
@@ -80,7 +95,12 @@ class SearchIndexerSubscriber
         $reflectionClass = new ReflectionClass($entity);
 
         if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
-            $this->indexer->index($entity);
+            try {
+                $this->indexer->index($entity);
+            } catch (\Exception $e) {
+                $this->logger->error($e->getMessage());
+            }
+
         }
     }
 }
