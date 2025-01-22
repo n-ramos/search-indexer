@@ -2,7 +2,6 @@
 
 namespace Nramos\SearchIndexer\Indexer;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Nramos\SearchIndexer\Annotation\IndexableEntityAttributesLoader;
 
 class IndexableObjects
@@ -15,6 +14,7 @@ class IndexableObjects
     public function getIndexedClasses(): array
     {
         $indexedEntities = $this->indexablesEntities->load();
-        return array_merge( $this->indexedClasses,$indexedEntities);
+
+        return array_merge($this->indexedClasses, $indexedEntities);
     }
 }

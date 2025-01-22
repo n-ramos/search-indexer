@@ -4,6 +4,9 @@ namespace Nramos\SearchIndexer\Meilisearch;
 
 use Exception;
 use JsonException;
+use Nramos\SearchIndexer\Dto\MetaResultDto;
+use Nramos\SearchIndexer\Dto\SearchResultCollectionDto;
+use Nramos\SearchIndexer\Dto\SearchResultSingleDto;
 use Nramos\SearchIndexer\Filter\SearchFilterInterface;
 use Nramos\SearchIndexer\Indexer\SearchClientInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -46,7 +49,7 @@ class MeilisearchClient implements SearchClientInterface
         return $this->api('indexes/'.$index.'/documents', [], 'DELETE');
     }
 
-    public function search(string $indexName, string $query, ?SearchFilterInterface $filters = null, int $limit = 10, int $page = 1, array $facets = []): mixed
+    public function search(string $indexName, string $query, ?SearchFilterInterface $filters = null, int $limit = 10, int $page = 1, array $facets = []): SearchResultCollectionDto
     {
         $dataToSend = [
             'q' => $query,
@@ -57,10 +60,31 @@ class MeilisearchClient implements SearchClientInterface
         if ($filters instanceof SearchFilterInterface) {
             $dataToSend['filter'] = $filters->toString();
         }
+        $results = $this->api('indexes/'.$indexName.'/search', $dataToSend);
 
-        return $this->api('indexes/'.$indexName.'/search', $dataToSend);
+        $hits = array_map(function (array $hit) use ($indexName) {
+            $meta = MetaResultDto::transform($this->formatMeta($hit));
+            $meta->setIndexName($indexName);
+            return (SearchResultSingleDto::transform($hit, $meta));
+        }, $results['hits']);
+
+        return SearchResultCollectionDto::transform($this->formatMeta($results), $hits);
     }
-
+    private function formatMeta(array $data): array
+    {
+        return [
+            'indexName' => $data['indexName'] ?? null,
+            'query' => $data['query'] ?? null,
+            'limit' => $data['limit'] ?? null,
+            'offset' => $data['offset'] ?? null,
+            'estimatedHits' => $data['estimatedTotalHits'] ?? null,
+            'page' => $data['page'] ?? null,
+            'perPage' => $data['hitsPerPage'] ?? null,
+            'score' => $data['_rankingScore'] ?? null,
+            'totalPages' => $data['totalPages'] ?? null,
+            'totalHits' => $data['totalHits'] ?? null,
+        ];
+    }
     public function createIndex(string $indexName): void
     {
         $this->api('indexes', [
@@ -81,20 +105,33 @@ class MeilisearchClient implements SearchClientInterface
             'filterableAttributes' => $filterablesAttributes,
         ], 'PATCH');
 
-        if(isset($indexSettings['primaryKey'])) {
+        if (isset($indexSettings['primaryKey'])) {
             $this->api('indexes/'.$indexName, [
                 'primaryKey' => $indexSettings['primaryKey'],
             ], 'PATCH');
         }
     }
 
-    public function multiSearch(array $queries): mixed
+    public function multiSearch(array $queries, int $limit = 100, int $offset = 0): SearchResultCollectionDto
     {
         // Meilisearch multi-search requiert l'envoi des requêtes dans un tableau 'queries'
-        $dataToSend = ['queries' => $queries];
+        $dataToSend = [
+            'federation' => [
+                'offset' => $offset,
+                'limit' => $limit,
+            ],
+            'queries' => $queries,
+        ];
+        $results = $this->api('multi-search', $dataToSend);
+        $hits = array_map(function (array $hit) {
+            $meta = MetaResultDto::transform($this->formatMeta($hit));
+            $meta->setScore($hit['_federation']['weightedRankingScore'] ?? null);
+            $meta->setIndexName($hit['_federation']['indexUid'] ?? null);
+            unset($hit['_federation']);
+            return (SearchResultSingleDto::transform($hit, $meta));
+        }, $results['hits']);
 
-        // Appel au point d'accès multi-search de Meilisearch
-        return $this->api('multi-search', $dataToSend);
+        return SearchResultCollectionDto::transform($this->formatMeta($results), $hits);
     }
 
     /**

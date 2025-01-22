@@ -32,8 +32,8 @@
   },
   "scripts": {
     "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always",
-    "csfixer": "tools/cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
-    "cs-check": "tools/cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi --dry-run",
+    "csfixer": "PHP_CS_FIXER_IGNORE_ENV=1 tools/cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
+    "cs-check": "PHP_CS_FIXER_IGNORE_ENV=1 tools/cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi --dry-run",
     "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",
     "rector": "tools/rector/vendor/bin/rector process src",
     "rector-check": "tools/rector/vendor/bin/rector --dry-run",

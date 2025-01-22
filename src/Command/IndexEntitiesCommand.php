@@ -9,6 +9,7 @@ use Nramos\SearchIndexer\Indexer\IndexableObjects;
 use Nramos\SearchIndexer\Tests\Command\IndexEntitiesCommandTest;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -71,14 +72,16 @@ class IndexEntitiesCommand extends Command
     {
         $repository = $this->entityManager->getRepository($entityClass);
         $entities = $repository->findAll();
-
+        $progressBar = new ProgressBar($output, \count($entities));
         foreach ($entities as $entity) {
             if ($entity instanceof IndexableEntityInterface) {
                 $this->indexer->index($entity);
+                $progressBar->advance();
             }
         }
+        $progressBar->finish();
 
-        $output->writeln(\sprintf('Indexed all entities of class %s.', $entityClass));
+        $output->writeln(\sprintf(' Indexed all entities of class %s.', $entityClass));
     }
 
     private function removeEntities(string $entityClass, OutputInterface $output): void

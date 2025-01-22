@@ -150,7 +150,7 @@ class MeiliSearchFilter implements SearchFilterInterface
         foreach ($filterStrings as $index => $filterString) {
             if ($index > 0) {
                 $separator = $this->filters[$index - 1]['separator'];
-                if ('' !== $result && !str_ends_with(trim($result), '(') && !str_starts_with(trim((string) $filterString), ')')) {
+                if ('' !== $result && !str_ends_with(mb_trim($result), '(') && !str_starts_with(mb_trim((string) $filterString), ')')) {
                     $result .= ' '.$separator.' ';
                 }
             }
