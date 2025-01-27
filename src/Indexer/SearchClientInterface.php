@@ -19,5 +19,5 @@ interface SearchClientInterface
 
     public function updateSettings(string $indexName, array $indexSettings): void;
 
-    public function multiSearch(array $queries): SearchResultCollectionDto;
+    public function multiSearch(array $queries, int $limit = 100, int $offset = 0, ?SearchFilterInterface $filters = null): SearchResultCollectionDto;
 }
