@@ -112,7 +112,7 @@ class MeilisearchClient implements SearchClientInterface
         }
     }
 
-    public function multiSearch(array $queries, int $limit = 100, int $offset = 0): SearchResultCollectionDto
+    public function multiSearch(array $queries, int $limit = 100, int $offset = 0, ?SearchFilterInterface $filters = null): SearchResultCollectionDto
     {
         // Meilisearch multi-search requiert l'envoi des requêtes dans un tableau 'queries'
         $dataToSend = [
@@ -122,6 +122,9 @@ class MeilisearchClient implements SearchClientInterface
             ],
             'queries' => $queries,
         ];
+        if ($filters instanceof SearchFilterInterface) {
+            $dataToSend['filter'] = $filters->toString();
+        }
         $results = $this->api('multi-search', $dataToSend);
         $hits = array_map(function (array $hit) {
             $meta = MetaResultDto::transform($this->formatMeta($hit));
