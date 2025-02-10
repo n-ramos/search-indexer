@@ -72,7 +72,7 @@ class MeilisearchClient implements SearchClientInterface
     }
     private function formatMeta(array $data): array
     {
-        return [
+        $meta = [
             'indexName' => $data['indexName'] ?? null,
             'query' => $data['query'] ?? null,
             'limit' => $data['limit'] ?? null,
@@ -84,6 +84,11 @@ class MeilisearchClient implements SearchClientInterface
             'totalPages' => $data['totalPages'] ?? null,
             'totalHits' => $data['totalHits'] ?? null,
         ];
+
+        if(isset($data['facetDistribution'])) {
+            $meta['facetDistribution'] = $data['facetDistribution'];
+        }
+        return $meta;
     }
     public function createIndex(string $indexName): void
     {

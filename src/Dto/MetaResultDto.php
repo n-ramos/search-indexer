@@ -15,6 +15,7 @@ class MetaResultDto
         private ?int $totalPages,
         private ?int $totalHits,
         private ?int $estimatedHits,
+        private array $facetsDistribution = [],
 
     ){}
 
@@ -124,7 +125,19 @@ class MetaResultDto
     {
         $this->estimatedHits = $estimatedHits;
     }
+
+    public function getFacetsDistribution(): array
+    {
+        return $this->facetsDistribution;
+    }
+
+    public function setFacetsDistribution(array $facetsDistribution): void
+    {
+        $this->facetsDistribution = $facetsDistribution;
+    }
+
     public static function transform(array $data) : self {
+
         return new self(
             $data['indexName'],
             $data['score'],
@@ -136,6 +149,7 @@ class MetaResultDto
             $data['totalPages'],
             $data['totalHits'],
             $data['estimatedHits'],
+            isset($data['facetDistribution']) ? $data['facetDistribution'] : []
         );
     }
     public function toArray() : array {
@@ -150,6 +164,7 @@ class MetaResultDto
             'totalPages' => $this->totalPages,
             'totalHits' => $this->totalHits,
             'estimatedHits' => $this->estimatedHits,
+            'facetsDistribution' => $this->facetsDistribution,
         ];
         return array_filter($result, fn($value) => $value !== null);
     }
