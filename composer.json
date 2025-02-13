@@ -5,18 +5,18 @@
   "license": "MIT",
   "require": {
     "php" : ">=8.2",
-    "symfony/dependency-injection": "^7.1",
-    "symfony/config": "^7.1",
+    "symfony/dependency-injection": "^6.2|^7.1",
+    "symfony/config": "^6.2|^7.1",
     "doctrine/orm": "^3.2",
     "doctrine/doctrine-bundle": "^2.0",
-    "symfony/http-client": "^7.1",
-    "symfony/http-kernel": "^7.1",
-    "symfony/framework-bundle": "^7.1",
-    "symfony/dotenv": "^7.1",
+    "symfony/http-client": "^6.2|^7.1",
+    "symfony/http-kernel": "^6.2|^7.1",
+    "symfony/framework-bundle": "^6.2|^7.1",
+    "symfony/dotenv": "^6.2|7.1",
     "symfony/monolog-bundle": "^3.10"
   },
   "require-dev": {
-    "symfony/var-dumper": "^7.0",
+    "symfony/var-dumper": "^6.2|^7.0",
     "phpunit/phpunit": "^11.2",
     "nyholm/symfony-bundle-test": "^3.0",
     "matthiasnoback/symfony-dependency-injection-test": "^6.0"
