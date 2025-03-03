@@ -39,6 +39,7 @@ class IndexEntitiesCommand extends Command
         $this
             ->setDescription('Indexes specified entities or all entities if none specified')
             ->addArgument('entityClass', InputArgument::OPTIONAL, 'The entity class to index')
+            ->addOption('max-per-page', 'mp', InputOption::VALUE_OPTIONAL, 'Number of entities to process per page', 100)
         ;
     }
 
@@ -59,7 +60,7 @@ class IndexEntitiesCommand extends Command
             // @var class-string<IndexableEntityInterface> $entityClass
             $this->indexEntities($entityClass, $output);
         } else {
-            $this->indexAllEntities($output);
+            $this->indexAllEntities($input, $output);
         }
 
         return Command::SUCCESS;
@@ -68,19 +69,37 @@ class IndexEntitiesCommand extends Command
     /**
      * @param class-string<IndexableEntityInterface> $entityClass
      */
-    private function indexEntities(string $entityClass, OutputInterface $output): void
+    private function indexEntities(string $entityClass, InputInterface $input, OutputInterface $output): void
     {
+        $batchSize = (int) $input->getOption('max-per-page');
         $repository = $this->entityManager->getRepository($entityClass);
-        $entities = $repository->findAll();
-        $progressBar = new ProgressBar($output, \count($entities));
-        foreach ($entities as $entity) {
-            if ($entity instanceof IndexableEntityInterface) {
-                $this->indexer->index($entity);
-                $progressBar->advance();
-            }
-        }
-        $progressBar->finish();
 
+        $count = $repository->createQueryBuilder('e')
+            ->select('COUNT(e.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $progressBar = new ProgressBar($output, $count);
+        $progressBar->start();
+
+        $offset = 0;
+        while ($offset < $count) {
+            $entities = $repository->findBy([], ['id' => 'ASC'], $batchSize, $offset);
+            foreach ($entities as $entity) {
+                if ($entity instanceof IndexableEntityInterface) {
+                    $this->indexer->index($entity);
+                    $progressBar->advance();
+                }
+                else {
+                    var_dump(false);
+                }
+            }
+
+            $offset += $batchSize;
+            $this->entityManager->clear();
+        }
+
+        $progressBar->finish();
         $output->writeln(\sprintf(' Indexed all entities of class %s.', $entityClass));
     }
 
@@ -91,7 +110,7 @@ class IndexEntitiesCommand extends Command
         $output->writeln(\sprintf('Removed all entities of class %s from index.', $entityClass));
     }
 
-    private function indexAllEntities(OutputInterface $output): void
+    private function indexAllEntities(InputInterface $input, OutputInterface $output): void
     {
         $indexedClasses = $this->indexableObjects->getIndexedClasses();
         foreach ($indexedClasses as $entityClass) {
