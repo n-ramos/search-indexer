@@ -1,8 +1,14 @@
 {
   "name": "nramos/search-indexer",
   "type": "symfony-bundle",
-  "description": "This bundle ",
   "license": "MIT",
+  "homepage": "https://github.com/n-ramos/search-indexer",
+  "description": "A Doctrine entity indexer supporting Meilisearch and extensible for other indexing systems.",
+  "keywords": ["search", "indexing", "doctrine", "meilisearch", "symfony", "database"],
+  "support": {
+    "issues": "https://github.com/n-ramos/search-indexer/issues",
+    "source": "https://github.com/n-ramos/search-indexer"
+  },
   "require": {
     "php" : ">=8.2",
     "symfony/dependency-injection": "^6.2|^7.1",
