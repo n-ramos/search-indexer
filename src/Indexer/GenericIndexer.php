@@ -24,11 +24,35 @@ class GenericIndexer implements IndexerInterface
 
     public function index(object $data): void
     {
-        $className = $data::class;
+        $className = $this->getRealClass($data);
         $indexName = $this->getIndexName($className);
         $indexData = $this->extractData($data);
         $this->client->put($indexName, [$indexData]);
+    }
 
+    public function getRealClass(object|string $subject): string
+    {
+        $subject = \is_object($subject) ? $subject::class : $subject;
+
+        // __CG__: Doctrine Common Marker for Proxy (ODM < 2.0 and ORM < 3.0)
+        // __PM__: Ocramius Proxy Manager (ODM >= 2.0)
+        $positionCg = mb_strrpos($subject, '\__CG__\\');
+        $positionPm = mb_strrpos($subject, '\__PM__\\');
+        if (false === $positionCg && false === $positionPm) {
+            return $subject;
+        }
+
+        if (false !== $positionCg) {
+            return mb_substr($subject, $positionCg + 8);
+        }
+
+        $className = mb_ltrim($subject, '\\');
+
+        return mb_substr(
+            $className,
+            8 + $positionPm,
+            mb_strrpos($className, '\\') - ($positionPm + 8)
+        );
     }
 
     public function remove(IndexableEntityInterface $entityClass): void
@@ -138,7 +162,7 @@ class GenericIndexer implements IndexerInterface
                 }
             }
         } catch (ReflectionException $e) {
-            throw new Exception(sprintf('Failed to inspect class %s: %s', $entityClass, $e->getMessage()));
+            throw new Exception(\sprintf('Failed to inspect class %s: %s', $entityClass, $e->getMessage()));
         }
 
         // Mettre à jour les paramètres de l'index sur le client de recherche
@@ -152,7 +176,6 @@ class GenericIndexer implements IndexerInterface
         // Réinitialiser les paramètres de l'index pour la prochaine utilisation
         $this->indexSettings = [];
     }
-
 
     private function handleProperties(ReflectionMethod|ReflectionProperty $property, object $entity, array &$data): void
     {
@@ -188,7 +211,6 @@ class GenericIndexer implements IndexerInterface
             } else {
                 $data[$annotation->propertyName] = $value;
             }
-
         }
     }
 
