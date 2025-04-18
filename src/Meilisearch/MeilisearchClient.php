@@ -9,15 +9,15 @@ use Nramos\SearchIndexer\Dto\SearchResultCollectionDto;
 use Nramos\SearchIndexer\Dto\SearchResultSingleDto;
 use Nramos\SearchIndexer\Filter\SearchFilterInterface;
 use Nramos\SearchIndexer\Indexer\SearchClientInterface;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MeilisearchClient implements SearchClientInterface
 {
-    public function __construct(private readonly string $host, private readonly string $apiKey, private readonly HttpClientInterface $client) {}
+    public function __construct(private readonly string $host, private readonly string $apiKey) {}
 
     public function get(string $endpoint): mixed
     {
@@ -65,31 +65,13 @@ class MeilisearchClient implements SearchClientInterface
         $hits = array_map(function (array $hit) use ($indexName) {
             $meta = MetaResultDto::transform($this->formatMeta($hit));
             $meta->setIndexName($indexName);
-            return (SearchResultSingleDto::transform($hit, $meta));
+
+            return SearchResultSingleDto::transform($hit, $meta);
         }, $results['hits']);
 
         return SearchResultCollectionDto::transform($this->formatMeta($results), $hits);
     }
-    private function formatMeta(array $data): array
-    {
-        $meta = [
-            'indexName' => $data['indexName'] ?? null,
-            'query' => $data['query'] ?? null,
-            'limit' => $data['limit'] ?? null,
-            'offset' => $data['offset'] ?? null,
-            'estimatedHits' => $data['estimatedTotalHits'] ?? null,
-            'page' => $data['page'] ?? null,
-            'perPage' => $data['hitsPerPage'] ?? null,
-            'score' => $data['_rankingScore'] ?? null,
-            'totalPages' => $data['totalPages'] ?? null,
-            'totalHits' => $data['totalHits'] ?? null,
-        ];
 
-        if(isset($data['facetDistribution'])) {
-            $meta['facetDistribution'] = $data['facetDistribution'];
-        }
-        return $meta;
-    }
     public function createIndex(string $indexName): void
     {
         $this->api('indexes', [
@@ -136,7 +118,8 @@ class MeilisearchClient implements SearchClientInterface
             $meta->setScore($hit['_federation']['weightedRankingScore'] ?? null);
             $meta->setIndexName($hit['_federation']['indexUid'] ?? null);
             unset($hit['_federation']);
-            return (SearchResultSingleDto::transform($hit, $meta));
+
+            return SearchResultSingleDto::transform($hit, $meta);
         }, $results['hits']);
 
         return SearchResultCollectionDto::transform($this->formatMeta($results), $hits);
@@ -156,7 +139,7 @@ class MeilisearchClient implements SearchClientInterface
             $headers['Authorization'] = 'Bearer '.$this->apiKey;
         }
 
-        $response = $this->client->request($method, \sprintf('http://%s/%s', $this->host, $endpoint), [
+        $response = HttpClient::create()->request($method, \sprintf('http://%s/%s', $this->host, $endpoint), [
             'json' => $data,
             'headers' => $headers,
         ]);
@@ -169,5 +152,27 @@ class MeilisearchClient implements SearchClientInterface
         json_decode($result, true, 512, JSON_THROW_ON_ERROR);
 
         throw new Exception($result);
+    }
+
+    private function formatMeta(array $data): array
+    {
+        $meta = [
+            'indexName' => $data['indexName'] ?? null,
+            'query' => $data['query'] ?? null,
+            'limit' => $data['limit'] ?? null,
+            'offset' => $data['offset'] ?? null,
+            'estimatedHits' => $data['estimatedTotalHits'] ?? null,
+            'page' => $data['page'] ?? null,
+            'perPage' => $data['hitsPerPage'] ?? null,
+            'score' => $data['_rankingScore'] ?? null,
+            'totalPages' => $data['totalPages'] ?? null,
+            'totalHits' => $data['totalHits'] ?? null,
+        ];
+
+        if (isset($data['facetDistribution'])) {
+            $meta['facetDistribution'] = $data['facetDistribution'];
+        }
+
+        return $meta;
     }
 }
