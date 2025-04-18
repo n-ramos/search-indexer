@@ -1,4 +1,5 @@
 <?php
+
 namespace Nramos\SearchIndexer\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,11 +25,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class IndexEntitiesCommand extends Command
 {
-    private readonly EntityManagerInterface $entityManager;
-    private readonly GenericIndexer $indexer;
-
     // Taille du lot par défaut
     private const DEFAULT_BATCH_SIZE = 100;
+    private readonly EntityManagerInterface $entityManager;
+    private readonly GenericIndexer $indexer;
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -64,6 +64,7 @@ class IndexEntitiesCommand extends Command
                     '<error>The class %s must implement IndexableEntityInterface.</error>',
                     \is_string($entityClass) ? $entityClass : \gettype($entityClass)
                 ));
+
                 return Command::FAILURE;
             }
 
@@ -108,7 +109,8 @@ class IndexEntitiesCommand extends Command
             $query = $queryBuilder
                 ->setFirstResult($offset)
                 ->setMaxResults($batchSize)
-                ->getQuery();
+                ->getQuery()
+            ;
 
             // Utiliser Paginator pour éviter les problèmes avec les collections
             $paginator = new Paginator($query, false);
@@ -124,7 +126,7 @@ class IndexEntitiesCommand extends Command
 
                 if (!empty($entitiesToIndex)) {
                     $this->indexer->bulkIndex($entitiesToIndex);
-                    $progressBar->advance(count($entitiesToIndex));
+                    $progressBar->advance(\count($entitiesToIndex));
                 }
             } else {
                 // Indexation individuelle
@@ -161,7 +163,7 @@ class IndexEntitiesCommand extends Command
         bool $useBulk = false
     ): void {
         $indexedClasses = $this->indexableObjects->getIndexedClasses();
-        $output->writeln(\sprintf('Indexing %d entity classes...', count($indexedClasses)));
+        $output->writeln(\sprintf('Indexing %d entity classes...', \count($indexedClasses)));
 
         foreach ($indexedClasses as $entityClass) {
             if (!$skipClean) {

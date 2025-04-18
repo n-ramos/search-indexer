@@ -16,8 +16,7 @@ class MetaResultDto
         private ?int $totalHits,
         private ?int $estimatedHits,
         private array $facetsDistribution = [],
-
-    ){}
+    ) {}
 
     public function getIndexName(): ?string
     {
@@ -37,6 +36,7 @@ class MetaResultDto
     public function setScore(?float $score): self
     {
         $this->score = $score;
+
         return $this;
     }
 
@@ -48,6 +48,7 @@ class MetaResultDto
     public function setQuery(?string $query): self
     {
         $this->query = $query;
+
         return $this;
     }
 
@@ -59,6 +60,7 @@ class MetaResultDto
     public function setLimit(?int $limit): self
     {
         $this->limit = $limit;
+
         return $this;
     }
 
@@ -70,6 +72,7 @@ class MetaResultDto
     public function setOffset(?int $offset): self
     {
         $this->offset = $offset;
+
         return $this;
     }
 
@@ -81,6 +84,7 @@ class MetaResultDto
     public function setPerPage(?int $perPage): self
     {
         $this->perPage = $perPage;
+
         return $this;
     }
 
@@ -92,6 +96,7 @@ class MetaResultDto
     public function setPage(?int $page): self
     {
         $this->page = $page;
+
         return $this;
     }
 
@@ -103,6 +108,7 @@ class MetaResultDto
     public function setTotalPages(?int $totalPages): self
     {
         $this->totalPages = $totalPages;
+
         return $this;
     }
 
@@ -136,8 +142,8 @@ class MetaResultDto
         $this->facetsDistribution = $facetsDistribution;
     }
 
-    public static function transform(array $data) : self {
-
+    public static function transform(array $data): self
+    {
         return new self(
             $data['indexName'],
             $data['score'],
@@ -152,8 +158,10 @@ class MetaResultDto
             isset($data['facetDistribution']) ? $data['facetDistribution'] : []
         );
     }
-    public function toArray() : array {
-        $result =  [
+
+    public function toArray(): array
+    {
+        $result = [
             'indexName' => $this->indexName,
             'score' => $this->score,
             'query' => $this->query,
@@ -166,8 +174,7 @@ class MetaResultDto
             'estimatedHits' => $this->estimatedHits,
             'facetsDistribution' => $this->facetsDistribution,
         ];
-        return array_filter($result, fn($value) => $value !== null);
+
+        return array_filter($result, static fn ($value) => null !== $value);
     }
-
-
 }

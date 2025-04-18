@@ -6,6 +6,7 @@ use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Events;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Exception;
 use Nramos\SearchIndexer\Annotation\SearchIndex;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -21,9 +22,7 @@ class SearchIndexerSubscriber
     public function __construct(
         private readonly IndexerInterface $indexer,
         private readonly LoggerInterface $logger
-    )
-    {
-    }
+    ) {}
 
     public function getSubscribedEvents(): array
     {
@@ -41,10 +40,9 @@ class SearchIndexerSubscriber
     {
         try {
             $this->indexEntity($args);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage());
         }
-
     }
 
     /**
@@ -62,10 +60,9 @@ class SearchIndexerSubscriber
         if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
             try {
                 $this->indexer->remove($entity);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->logger->error($e->getMessage());
             }
-
         }
     }
 
@@ -76,10 +73,9 @@ class SearchIndexerSubscriber
     {
         try {
             $this->indexEntity($args);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage());
         }
-
     }
 
     /**
@@ -97,10 +93,9 @@ class SearchIndexerSubscriber
         if ($reflectionClass->getAttributes(SearchIndex::class) && $reflectionClass->getAttributes(SearchIndex::class)[0]->newInstance()->autoIndex) {
             try {
                 $this->indexer->index($entity);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->logger->error($e->getMessage());
             }
-
         }
     }
 }
