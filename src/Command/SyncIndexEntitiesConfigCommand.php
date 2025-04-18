@@ -21,7 +21,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class SyncIndexEntitiesConfigCommand extends Command
 {
-
     private readonly GenericIndexer $indexer;
 
     public function __construct(GenericIndexer $indexer, private readonly IndexableObjects $indexableObjects)
@@ -60,11 +59,10 @@ class SyncIndexEntitiesConfigCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function updateSettings($entityClass) {
-
+    private function updateSettings($entityClass)
+    {
         $this->indexer->updateIndexSettings($entityClass);
     }
-
 
     private function updateAllSettings(OutputInterface $output)
     {
