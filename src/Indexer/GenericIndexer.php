@@ -149,7 +149,7 @@ class GenericIndexer implements IndexerInterface
                 $attributes = $property->getAttributes(SearchProperty::class);
                 if ($attributes) {
                     $annotation = $attributes[0]->newInstance();
-                    $this->addIndexSettings($annotation, $property->getName());
+                    $this->addIndexSettings($annotation);
                 }
             }
 
@@ -158,7 +158,7 @@ class GenericIndexer implements IndexerInterface
                 $attributes = $method->getAttributes(SearchProperty::class);
                 if ($attributes) {
                     $annotation = $attributes[0]->newInstance();
-                    $this->addIndexSettings($annotation, $method->getName());
+                    $this->addIndexSettings($annotation);
                 }
             }
         } catch (ReflectionException $e) {
@@ -214,21 +214,21 @@ class GenericIndexer implements IndexerInterface
         }
     }
 
-    private function addIndexSettings(SearchProperty $annotation, string $propertyName): void
+    private function addIndexSettings(SearchProperty $annotation): void
     {
         if ($annotation->filterable) {
-            $this->indexSettings['filterable'][] = $propertyName;
+            $this->indexSettings['filterable'][] = $annotation->propertyName;
         }
 
         if ($annotation->sortable) {
-            $this->indexSettings['sortable'][] = $propertyName;
+            $this->indexSettings['sortable'][] = $annotation->propertyName;
         }
 
         if ($annotation->searchable) {
-            $this->indexSettings['searchable'][] = $propertyName;
+            $this->indexSettings['searchable'][] = $annotation->propertyName;
         }
         if ($annotation->isPk) {
-            $this->indexSettings['primaryKey'] = $propertyName;
+            $this->indexSettings['primaryKey'] = $annotation->propertyName;
         }
     }
 }
