@@ -49,14 +49,16 @@ class MeilisearchClient implements SearchClientInterface
         return $this->api('indexes/'.$index.'/documents', [], 'DELETE');
     }
 
-    public function search(string $indexName, string $query, ?SearchFilterInterface $filters = null, int $limit = 10, int $page = 1, array $facets = []): SearchResultCollectionDto
+    public function search(string $indexName, string $query, ?SearchFilterInterface $filters = null, int $limit = 10, int $page = 1, array $facets = [], array $optionnalDataToSend = []): SearchResultCollectionDto
     {
         $dataToSend = [
             'q' => $query,
             'facets' => $facets,
             'limit' => $limit,
             'page' => $page,
+            'showRankingScore' => true
         ];
+        $dataToSend = array_merge($dataToSend, $optionnalDataToSend);
         if ($filters instanceof SearchFilterInterface) {
             $dataToSend['filter'] = $filters->toString();
         }
