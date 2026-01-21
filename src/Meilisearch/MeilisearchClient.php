@@ -54,7 +54,7 @@ class MeilisearchClient implements SearchClientInterface
         $dataToSend = [
             'q' => $query,
             'facets' => $facets,
-            'limit' => $limit,
+            'hitsPerPage' => $limit,
             'page' => $page,
             'showRankingScore' => true
         ];
