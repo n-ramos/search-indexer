@@ -35,10 +35,13 @@ jobs:
 
     strategy:
       matrix:
-        php:
-          - '8.3'
-        symfony:
-          - '7.*'
+        include:
+          - php: '8.3'
+            symfony: '7.*'
+            symfony_require: '^7.0'
+          - php: '8.4'
+            symfony: '8.*'
+            symfony_require: '^8.0'
       fail-fast: false
 
     steps:
@@ -69,9 +72,8 @@ jobs:
           key: ${{ matrix.php }}-composer-${{ hashFiles('**/composer.json') }}
           restore-keys: ${{ matrix.php }}-composer-
 
-      - name: Update project dependencies (7.*)
-        if: matrix.symfony == '7.*'
-        run: SYMFONY_REQUIRE="^7.0" composer update --no-progress --ansi --prefer-stable
+      - name: Update project dependencies
+        run: SYMFONY_REQUIRE="${{ matrix.symfony_require }}" composer update --no-progress --ansi --prefer-stable
 
       - name: Run tests
         run: |

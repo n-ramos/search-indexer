@@ -3,8 +3,12 @@
 <a name="next"></a>
 ## next
 
+<a name="2.2.5"></a>
+## 2.2.5 (2026-02-09)
+
 ### Added
 
+- ✨ Add Symfony 8 compatibility in Composer constraints and CI matrix
 - ✨ Test for meilisearch client [[87d12f4](https://github.com/n-ramos/search-indexer/commit/87d12f40ff65190a8c8e19fec1a5a7bad61c7b28)]
 - ✨ add test index [[e8560a3](https://github.com/n-ramos/search-indexer/commit/e8560a336a5d3e4f3ac32c32822e8bb032b313a4)]
 - ✨ cs fixer + rector + phpstan &amp; refacto with them [[49234e7](https://github.com/n-ramos/search-indexer/commit/49234e76519bf64eeeef559d4da80ea6baf0aaec)]
@@ -39,5 +43,3 @@
 ### Miscellaneous
 
 -  first commit [[e203fa6](https://github.com/n-ramos/search-indexer/commit/e203fa6d0602498788b4da22fd99453969a3bb11)]
-
-
