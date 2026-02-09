@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Entity\Post;
 use Nramos\SearchIndexer\Command\IndexEntitiesCommand;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
+use Nramos\SearchIndexer\Indexer\IndexableObjects;
 use Nramos\SearchIndexer\Tests\Entity\House;
 use Nramos\SearchIndexer\Tests\Entity\HouseType;
 use Nramos\SearchIndexer\Tests\Traits\EntityManagerInterfaceTrait;
@@ -24,6 +25,7 @@ use Symfony\Component\Console\Tester\CommandTester;
     use EntityManagerInterfaceTrait;
     private CommandTester $commandTester;
     private EntityManagerInterface $entityManager;
+    private array $indexedClasses = [];
 
     protected function setUp(): void
     {
@@ -31,10 +33,12 @@ use Symfony\Component\Console\Tester\CommandTester;
 
         $indexer = $this->createMock(GenericIndexer::class);
         $this->indexedClasses = [House::class, Post::class];
+        $indexableObjects = $this->createMock(IndexableObjects::class);
+        $indexableObjects->method('getIndexedClasses')->willReturn($this->indexedClasses);
 
         $application = new Application();
-        $command = new IndexEntitiesCommand($this->entityManager, $indexer, $this->indexedClasses);
-        $application->add($command);
+        $command = new IndexEntitiesCommand($this->entityManager, $indexer, $indexableObjects);
+        $application->addCommand($command);
 
         $this->commandTester = new CommandTester($application->find('search:import'));
     }
@@ -62,7 +66,7 @@ use Symfony\Component\Console\Tester\CommandTester;
         $this->commandTester->execute(['entityClass' => $entity::class]);
 
         $output = $this->commandTester->getDisplay();
-        self::assertStringContainsString('Indexed all entities of class', $output);
+        self::assertStringContainsString('Successfully indexed all entities of class', $output);
         self::assertSame(Command::SUCCESS, $this->commandTester->getStatusCode());
     }
 
@@ -71,7 +75,7 @@ use Symfony\Component\Console\Tester\CommandTester;
         $this->commandTester->execute([]);
         $output = $this->commandTester->getDisplay();
         self::assertStringContainsString('Removed all entities of class ', $output);
-        self::assertStringContainsString('Indexed all entities of class', $output);
+        self::assertStringContainsString('Successfully indexed all entities of class', $output);
         self::assertSame(Command::SUCCESS, $this->commandTester->getStatusCode());
     }
 
@@ -95,10 +99,12 @@ use Symfony\Component\Console\Tester\CommandTester;
     private function setUpEntityManagerMock(string $entityClass): void
     {
         $indexer = $this->createMock(GenericIndexer::class);
+        $indexableObjects = $this->createMock(IndexableObjects::class);
+        $indexableObjects->method('getIndexedClasses')->willReturn([$entityClass]);
 
         $application = new Application();
-        $command = new IndexEntitiesCommand($this->entityManager, $indexer, [$entityClass]);
-        $application->add($command);
+        $command = new IndexEntitiesCommand($this->entityManager, $indexer, $indexableObjects);
+        $application->addCommand($command);
 
         $this->commandTester = new CommandTester($application->find('search:import'));
     }

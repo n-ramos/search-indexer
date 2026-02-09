@@ -108,15 +108,4 @@ use PHPUnit\Framework\TestCase;
         $em->flush();
     }
 
-    public function testGetSubscribedEvents()
-    {
-        $subscriber = new SearchIndexerSubscriber($this->createMock(GenericIndexer::class));
-
-        $events = $subscriber->getSubscribedEvents();
-
-        self::assertContains(Events::postPersist, $events);
-        self::assertContains(Events::postUpdate, $events);
-        self::assertContains(Events::preRemove, $events);
-        self::assertCount(3, $events);
-    }
 }

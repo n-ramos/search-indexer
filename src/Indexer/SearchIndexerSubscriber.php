@@ -2,41 +2,30 @@
 
 namespace Nramos\SearchIndexer\Indexer;
 
-use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Events;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\PostPersistEventArgs;
+use Doctrine\ORM\Event\PostUpdateEventArgs;
+use Doctrine\ORM\Event\PreRemoveEventArgs;
 use Exception;
 use Nramos\SearchIndexer\Annotation\SearchIndex;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use ReflectionClass;
 
 /**
  * @see SearchIndexerSubscriberTest
  */
-#[AsDoctrineListener(event: Events::postPersist, priority: 0, connection: 'default')]
-#[AsDoctrineListener(event: Events::postUpdate, priority: 0, connection: 'default')]
-#[AsDoctrineListener(event: Events::preRemove, priority: 0, connection: 'default')]
 class SearchIndexerSubscriber
 {
+    private readonly LoggerInterface $logger;
+
     public function __construct(
         private readonly IndexerInterface $indexer,
-        private readonly LoggerInterface $logger
-    ) {}
-
-    public function getSubscribedEvents(): array
-    {
-        return [
-            Events::postPersist,
-            Events::postUpdate,
-            Events::preRemove,
-        ];
+        ?LoggerInterface $logger = null
+    ) {
+        $this->logger = $logger ?? new NullLogger();
     }
 
-    /**
-     * @param LifecycleEventArgs<EntityManagerInterface> $args
-     */
-    public function postPersist(LifecycleEventArgs $args): void
+    public function postPersist(PostPersistEventArgs $args): void
     {
         try {
             $this->indexEntity($args);
@@ -45,10 +34,7 @@ class SearchIndexerSubscriber
         }
     }
 
-    /**
-     * @param LifecycleEventArgs<EntityManagerInterface> $args
-     */
-    public function preRemove(LifecycleEventArgs $args): void
+    public function preRemove(PreRemoveEventArgs $args): void
     {
         $entity = $args->getObject();
         if (!$entity instanceof IndexableEntityInterface) {
@@ -66,10 +52,7 @@ class SearchIndexerSubscriber
         }
     }
 
-    /**
-     * @param LifecycleEventArgs<EntityManagerInterface> $args
-     */
-    public function postUpdate(LifecycleEventArgs $args): void
+    public function postUpdate(PostUpdateEventArgs $args): void
     {
         try {
             $this->indexEntity($args);
@@ -78,10 +61,7 @@ class SearchIndexerSubscriber
         }
     }
 
-    /**
-     * @param LifecycleEventArgs<EntityManagerInterface> $args
-     */
-    private function indexEntity(LifecycleEventArgs $args): void
+    private function indexEntity(PostPersistEventArgs|PostUpdateEventArgs $args): void
     {
         $entity = $args->getObject();
         if (!$entity instanceof IndexableEntityInterface) {

@@ -4,6 +4,7 @@ namespace Nramos\SearchIndexer\Tests\Client;
 
 use Exception;
 use JsonException;
+use Nramos\SearchIndexer\Dto\SearchResultCollectionDto;
 use Nramos\SearchIndexer\Filter\SearchFilterInterface;
 use Nramos\SearchIndexer\Meilisearch\MeilisearchClient;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -19,8 +20,8 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 {
     private $httpClient;
     private $meilisearchClient;
-    private $host = 'localhost';
-    private $apiKey = 'test_api_key';
+    private $host = 'localhost:7700';
+    private $apiKey = '!Change!Me';
 
     protected function setUp(): void
     {
@@ -30,7 +31,6 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
     public function testMultiSearch()
     {
-        // Définition des requêtes de recherche multi-index
         $queries = [
             [
                 'indexUid' => 'index1',
@@ -42,30 +42,42 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
             ],
         ];
 
-        // Contenu simulé pour la réponse multi-search
         $responseContent = [
-            'results' => [
+            'hits' => [
                 [
-                    'indexUid' => 'index1',
-                    'hits' => [
-                        ['id' => 1, 'title' => 'Test Result 1'],
+                    'id' => 1,
+                    'title' => 'Test Result 1',
+                    '_federation' => [
+                        'indexUid' => 'index1',
+                        'weightedRankingScore' => 0.9,
                     ],
                 ],
                 [
-                    'indexUid' => 'index2',
-                    'hits' => [
-                        ['id' => 2, 'title' => 'Test Result 2'],
+                    'id' => 2,
+                    'title' => 'Test Result 2',
+                    '_federation' => [
+                        'indexUid' => 'index2',
+                        'weightedRankingScore' => 0.8,
                     ],
                 ],
             ],
+            'offset' => 0,
+            'limit' => 100,
+            'estimatedTotalHits' => 2,
         ];
 
-        // Appel de mockHttpClient pour simuler la requête et la réponse HTTP
-        $this->mockHttpClient('POST', 'multi-search', ['queries' => $queries], 200, $responseContent);
+        $this->mockHttpClient('POST', 'multi-search', [
+            'federation' => [
+                'offset' => 0,
+                'limit' => 100,
+            ],
+            'queries' => $queries,
+        ], 200, $responseContent);
 
-        // Exécute multiSearch et vérifie que la réponse correspond à celle attendue
         $response = $this->meilisearchClient->multiSearch($queries);
-        self::assertSame($responseContent, $response);
+        self::assertInstanceOf(SearchResultCollectionDto::class, $response);
+        self::assertCount(2, $response->getResults());
+        self::assertSame('index1', $response->getResults()[0]->getMeta()->getIndexName());
     }
 
     public function testGet()
@@ -121,15 +133,28 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
         $expectedData = [
             'q' => 'query',
             'facets' => [],
-            'limit' => 10,
+            'hitsPerPage' => 10,
             'page' => 1,
+            'showRankingScore' => true,
             'filter' => 'filter_string',
         ];
 
-        $this->mockHttpClient('POST', 'indexes/test_index/search', $expectedData, 200, ['response' => 'data']);
+        $this->mockHttpClient('POST', 'indexes/test_index/search', $expectedData, 200, [
+            'hits' => [
+                ['id' => 10, 'title' => 'Result 1', '_rankingScore' => 0.7],
+            ],
+            'query' => 'query',
+            'hitsPerPage' => 10,
+            'page' => 1,
+            'totalPages' => 1,
+            'totalHits' => 1,
+            'estimatedTotalHits' => 1,
+        ]);
 
         $response = $this->meilisearchClient->search('test_index', 'query', $filters);
-        self::assertSame(['response' => 'data'], $response);
+        self::assertInstanceOf(SearchResultCollectionDto::class, $response);
+        self::assertCount(1, $response->getResults());
+        self::assertSame('test_index', $response->getResults()[0]->getMeta()->getIndexName());
     }
 
     public function testCreateIndex()

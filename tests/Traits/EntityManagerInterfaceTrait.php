@@ -18,6 +18,11 @@ trait EntityManagerInterfaceTrait
     private function createEntityManager(?array $paths = null, string $connectionName = 'default', ?array $params = null): EntityManagerInterface
     {
         $configuration = ORMSetup::createAttributeMetadataConfiguration($paths ?? $this->fixturesPath, true);
+        if (method_exists($configuration, 'enableNativeLazyObjects')) {
+            $configuration->enableNativeLazyObjects(true);
+        } elseif (method_exists($configuration, 'setLazyGhostObjectEnabled')) {
+            $configuration->setLazyGhostObjectEnabled(true);
+        }
         $configuration->setNamingStrategy(new UnderscoreNamingStrategy(CASE_LOWER));
 
         $connection = $this->getConnection($connectionName, $params);

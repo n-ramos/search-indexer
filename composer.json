@@ -14,11 +14,12 @@
     "symfony/dependency-injection": "^6.2|^7.1|^8.0",
     "symfony/config": "^6.2|^7.1|^8.0",
     "doctrine/doctrine-bundle": "^2.0|^3.0",
+    "doctrine/orm": "^2.17|^3.0",
     "symfony/http-client": "^6.2|^7.1|^8.0",
     "symfony/http-kernel": "^6.2|^7.1|^8.0",
     "symfony/framework-bundle": "^6.2|^7.1|^8.0",
     "symfony/dotenv": "^6.2|^7.1|^8.0",
-    "symfony/monolog-bundle": "^3.10"
+    "psr/log": "^2.0|^3.0"
   },
   "require-dev": {
     "symfony/var-dumper": "^6.2|^7.0|^8.0",
@@ -37,7 +38,7 @@
     }
   },
   "scripts": {
-    "test": "php -d pcov.enabled=1 ./vendor/bin/phpunit --colors=always",
+    "test": "php ./vendor/bin/phpunit --colors=always --no-coverage",
     "csfixer": "PHP_CS_FIXER_IGNORE_ENV=1 tools/cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi",
     "cs-check": "PHP_CS_FIXER_IGNORE_ENV=1 tools/cs-fixer/vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php --using-cache=no --verbose --ansi --dry-run",
     "phpstan": "tools/phpstan/vendor/bin/phpstan --ansi analyse src",

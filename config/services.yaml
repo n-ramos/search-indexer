@@ -13,3 +13,9 @@ services:
   Nramos\SearchIndexer\Indexer\IndexableObjects:
     arguments:
       $indexedClasses: '%nramos.search_indexes%'
+
+  Nramos\SearchIndexer\Indexer\SearchIndexerSubscriber:
+    tags:
+      - { name: doctrine.event_listener, event: postPersist }
+      - { name: doctrine.event_listener, event: postUpdate }
+      - { name: doctrine.event_listener, event: preRemove }

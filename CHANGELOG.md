@@ -3,6 +3,16 @@
 <a name="next"></a>
 ## next
 
+<a name="2.2.6"></a>
+## 2.2.6 (2026-02-09)
+
+### Fixed
+
+- 🔧 Fix Doctrine ORM compatibility and event listener registration for Symfony 8
+- 🔧 Restore injectable HTTP client in `MeilisearchClient` to make tests deterministic
+- 🔧 Update Meilisearch and command tests to match current APIs and Symfony Console changes
+- 🔧 Make `composer test` reliable without coverage driver requirement
+
 <a name="2.2.5"></a>
 ## 2.2.5 (2026-02-09)
 

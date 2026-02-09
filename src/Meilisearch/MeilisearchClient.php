@@ -14,10 +14,15 @@ use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MeilisearchClient implements SearchClientInterface
 {
-    public function __construct(private readonly string $host, private readonly string $apiKey) {}
+    public function __construct(
+        private readonly string $host,
+        private readonly string $apiKey,
+        private readonly ?HttpClientInterface $httpClient = null
+    ) {}
 
     public function get(string $endpoint): mixed
     {
@@ -141,7 +146,9 @@ class MeilisearchClient implements SearchClientInterface
             $headers['Authorization'] = 'Bearer '.$this->apiKey;
         }
 
-        $response = HttpClient::create()->request($method, \sprintf('http://%s/%s', $this->host, $endpoint), [
+        $client = $this->httpClient ?? HttpClient::create();
+
+        $response = $client->request($method, \sprintf('http://%s/%s', $this->host, $endpoint), [
             'json' => $data,
             'headers' => $headers,
         ]);
