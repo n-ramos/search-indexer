@@ -9,6 +9,8 @@ class SearchIndex
 {
     public function __construct(
         public string $indexName,
-        public bool $autoIndex = true
+        public bool $autoIndex = true,
+        /** @var string[] */
+        public array $eagerRelations = []
     ) {}
 }

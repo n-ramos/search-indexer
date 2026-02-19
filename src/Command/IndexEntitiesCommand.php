@@ -4,6 +4,7 @@ namespace Nramos\SearchIndexer\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Nramos\SearchIndexer\Annotation\SearchIndex;
 use Nramos\SearchIndexer\Indexer\GenericIndexer;
 use Nramos\SearchIndexer\Indexer\IndexableEntityInterface;
 use Nramos\SearchIndexer\Indexer\IndexableObjects;
@@ -82,6 +83,50 @@ class IndexEntitiesCommand extends Command
     }
 
     /**
+     * @return string[]
+     */
+    private function getEagerRelations(string $entityClass): array
+    {
+        $reflectionClass = new \ReflectionClass($entityClass);
+        $attributes = $reflectionClass->getAttributes(SearchIndex::class);
+
+        if ([] === $attributes) {
+            return [];
+        }
+
+        return $attributes[0]->newInstance()->eagerRelations;
+    }
+
+    /**
+     * @param class-string<IndexableEntityInterface> $entityClass
+     * @param list<int|string> $entityIds
+     * @param string[] $eagerRelations
+     */
+    private function warmUpRelations(string $entityClass, array $entityIds, array $eagerRelations): void
+    {
+        $qb = $this->entityManager->getRepository($entityClass)->createQueryBuilder('e');
+
+        foreach ($eagerRelations as $relation) {
+            if (str_contains($relation, '.')) {
+                $parts = explode('.', $relation);
+                $parentAlias = implode('_', \array_slice($parts, 0, -1));
+                $alias = str_replace('.', '_', $relation);
+                $joinPath = $parentAlias . '.' . end($parts);
+            } else {
+                $alias = $relation;
+                $joinPath = 'e.' . $relation;
+            }
+
+            $qb->leftJoin($joinPath, $alias)->addSelect($alias);
+        }
+
+        $qb->where('e.id IN (:ids)')
+            ->setParameter('ids', $entityIds)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * @param class-string<IndexableEntityInterface> $entityClass
      */
     private function indexEntities(
@@ -91,6 +136,7 @@ class IndexEntitiesCommand extends Command
         bool $useBulk = false
     ): void {
         $repository = $this->entityManager->getRepository($entityClass);
+        $eagerRelations = $this->getEagerRelations($entityClass);
 
         // Compter le nombre total d'entités pour la barre de progression
         $queryBuilder = $repository->createQueryBuilder('e');
@@ -115,26 +161,29 @@ class IndexEntitiesCommand extends Command
             // Utiliser Paginator pour éviter les problèmes avec les collections
             $paginator = new Paginator($query, false);
 
-            if ($useBulk && method_exists($this->indexer, 'bulkIndex')) {
-                // Collecter les entités pour l'indexation en bloc
-                $entitiesToIndex = [];
-                foreach ($paginator as $entity) {
-                    if ($entity instanceof IndexableEntityInterface) {
-                        $entitiesToIndex[] = $entity;
-                    }
+            // Collecter les entités du batch en une seule itération
+            $entities = [];
+            foreach ($paginator as $entity) {
+                if ($entity instanceof IndexableEntityInterface) {
+                    $entities[] = $entity;
                 }
+            }
 
-                if (!empty($entitiesToIndex)) {
-                    $this->indexer->bulkIndex($entitiesToIndex);
-                    $progressBar->advance(\count($entitiesToIndex));
+            // Charger les relations en avance via une requête séparée (évite les problèmes de pagination avec les OneToMany)
+            if ([] !== $eagerRelations && [] !== $entities) {
+                $entityIds = array_map(static fn (IndexableEntityInterface $e) => $e->getId(), $entities);
+                $this->warmUpRelations($entityClass, $entityIds, $eagerRelations);
+            }
+
+            if ($useBulk && method_exists($this->indexer, 'bulkIndex')) {
+                if (!empty($entities)) {
+                    $this->indexer->bulkIndex($entities);
+                    $progressBar->advance(\count($entities));
                 }
             } else {
-                // Indexation individuelle
-                foreach ($paginator as $entity) {
-                    if ($entity instanceof IndexableEntityInterface) {
-                        $this->indexer->index($entity);
-                        $progressBar->advance();
-                    }
+                foreach ($entities as $entity) {
+                    $this->indexer->index($entity);
+                    $progressBar->advance();
                 }
             }
 

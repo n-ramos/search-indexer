@@ -23,6 +23,19 @@ class MeiliSearchFilter implements SearchFilterInterface
         return $this;
     }
 
+    public function addNumericFilter(string $field, string $operator, int|float $value, string $separator = 'AND'): self
+    {
+        $this->filters[] = [
+            'type' => 'numeric',
+            'field' => $field,
+            'operator' => $operator,
+            'value' => $value,
+            'separator' => $separator,
+        ];
+
+        return $this;
+    }
+
     public function addInFilter(string $field, array $values, string $separator = 'AND'): self
     {
         $this->filters[] = [
@@ -103,6 +116,11 @@ class MeiliSearchFilter implements SearchFilterInterface
                 case 'basic':
                     $value = '"'.$filter['value'].'"';
                     $filterStrings[] = \sprintf('%s %s %s', $filter['field'], $filter['operator'], $value);
+
+                    break;
+
+                case 'numeric':
+                    $filterStrings[] = \sprintf('%s %s %s', $filter['field'], $filter['operator'], $filter['value']);
 
                     break;
 

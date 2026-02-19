@@ -195,7 +195,7 @@ class GenericIndexer implements IndexerInterface
                 $this->em->initializeObject($value);
             }
 
-            if (!empty($annotation->relationProperties) && $value) {
+            if (!empty($annotation->relationProperties) && $value && (\is_object($value) || is_iterable($value))) {
                 if (is_iterable($value)) {
                     // Convertir l'iterable en tableau
                     $arrayValue = \is_array($value) ? $value : iterator_to_array($value);
